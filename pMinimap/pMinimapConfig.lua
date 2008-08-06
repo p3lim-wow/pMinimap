@@ -62,13 +62,28 @@ local function Options(self, anchor)
 		'setFunc', function(value) Minimap:SetScale(value) db.scale = value Greenie(anchor) end,
 		'currentTextFunc', function(num) return ("%.1f"):format(num) end)
 	scale:SetPoint("TOPLEFT", reset, "BOTTOMLEFT", 0, -16)
+
+	local dura = self:MakeToggle(
+		'name', "Toggle Durability",
+		'description', "Set whether backdrop is recolored by durability or not",
+		'default', true,
+		'current', db.durability,
+		'setFunc', function(value) db.durability = value
+			if(value) then
+				DurabilityFrame:SetAlpha(0)
+			else
+				pMinimap:RegisterEvent("UPDATE_INVENTORY_ALERTS")
+				DurabilityFrame:SetAlpha(1)
+			end
+		end)
+	dura:SetPoint("TOPLEFT", scale, "BOTTOMLEFT", 0, -8)
 end
 
 local function OnEvent(self, name)
 	if(name == "pMinimap") then
 		db = _G.pMinimapDB
 		if(not db) then
-			db = { p1 = "TOPRIGHT", p2 = "TOPRIGHT", x = -15, y = -15, scale = 0.9, locked = true }
+			db = { p1 = "TOPRIGHT", p2 = "TOPRIGHT", x = -15, y = -15, scale = 0.9, locked = true, durability = true }
 			_G.pMinimapDB = db
 		end
 

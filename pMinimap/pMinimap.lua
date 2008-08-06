@@ -35,9 +35,9 @@
 function GetMinimapShape() return "SQUARE" end
 
 -- addon fluff
+local _G = getfenv(0)
 local addon = CreateFrame("Frame", "pMinimap", Minimap)
 local frames = {
-	MinimapNorthTag,
 	MinimapBorder,
 	MinimapBorderTop,
 	MinimapToggleButton,
@@ -54,14 +54,13 @@ local frames = {
 	MiniMapMailBorder,
 	MiniMapMailIcon,
 	BattlegroundShine,
-	DurabilityFrame,
 	GameTimeFrame,
 }
 
 function addon.PLAYER_LOGIN(self)
 	Minimap:EnableMouseWheel(true)
-	Minimap:SetScript("OnMouseWheel", function()
-		if(arg1 > 0) then
+	Minimap:SetScript("OnMouseWheel", function(self, dir)
+		if(dir > 0) then
 			Minimap_ZoomIn()
 		else
 			Minimap_ZoomOut()
@@ -88,31 +87,41 @@ function addon.PLAYER_LOGIN(self)
 	MiniMapMailText:SetText("New Mail!")
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
-	Minimap:SetMaskTexture("Interface\\ChatFrame\\ChatFrameBackground")
+	MinimapNorthTag:SetAlpha(0) -- it pops up on variables, this is an easy way out
+	DurabilityFrame:SetAlpha(0) -- it shows on events, another easy way out
 
-	self:SetFrameLevel(0)
+	Minimap:SetMaskTexture("Interface\\ChatFrame\\ChatFrameBackground")
+	Minimap:SetFrameStrata("LOW")
+
+	self:SetFrameStrata("BACKGROUND")
 	self:SetAllPoints(Minimap)
 	self:SetBackdrop({bgFile = "Interface\\ChatFrame\\ChatFrameBackground", insets = {top = -1, left = -1, bottom = -1, right = -1}})
 	self:SetBackdropColor(0, 0, 0)
 
 	-- hide all listed frames
-	for _,obj in pairs(frames) do obj:Hide(); obj.Show = function() end end
+	for _,obj in pairs(frames) do obj:Hide() end
 end
 
 -- durability backdrop recoloring (props to Malreth of WoWAce)
 function addon.UPDATE_INVENTORY_ALERTS(self)
-	local maxStatus = 0
-	for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
-		local status = GetInventoryAlertStatus(id)
-		if(status > maxStatus) then
-			maxStatus = status
+	local db = _G.pMinimapDB
+	if(db.durability) then
+		local maxStatus = 0
+		for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
+			local status = GetInventoryAlertStatus(id)
+			if(status > maxStatus) then
+				maxStatus = status
+			end
 		end
-	end
 
-	local color = INVENTORY_ALERT_COLORS[maxStatus]
-	if(color) then
-		self:SetBackdropColor(color.r, color.g, color.b)
+		local color = INVENTORY_ALERT_COLORS[maxStatus]
+		if(color) then
+			self:SetBackdropColor(color.r, color.g, color.b)
+		else
+			self:SetBackdropColor(0, 0, 0)
+		end
 	else
+		self:UnregisterEvent("UPDATE_INVENTORY_ALERTS")
 		self:SetBackdropColor(0, 0, 0)
 	end
 end
