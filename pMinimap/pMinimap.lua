@@ -73,7 +73,6 @@ function addon.PLAYER_LOGIN(self)
 	else
 		MiniMapTrackingBorder:Hide()
 	end
-
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935) -- bloody hell
 	MiniMapTracking:SetParent(Minimap)
 	MiniMapTracking:ClearAllPoints()
