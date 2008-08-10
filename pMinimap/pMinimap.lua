@@ -36,6 +36,7 @@ function GetMinimapShape() return "SQUARE" end
 
 -- addon fluff
 local _G = getfenv(0)
+local wotlk = select(4, GetBuildInfo()) >= 3e4
 local addon = CreateFrame("Frame", "pMinimap", Minimap)
 local frames = {
 	MinimapBorder,
@@ -45,7 +46,6 @@ local frames = {
 	MinimapZoomOut,
 	MinimapZoneText,
 	MinimapZoneTextButton,
-	MiniMapTrackingBorder,
 	MiniMapTrackingBackground,
 	MiniMapBattlefieldBorder,
 	MiniMapMeetingStoneFrame,
@@ -66,6 +66,13 @@ function addon.PLAYER_LOGIN(self)
 			Minimap_ZoomOut()
 		end
 	end)
+
+	if(wotlk) then
+		MiniMapTrackingIconOverlay:SetAlpha(0)
+		MiniMapTrackingButtonBorder:Hide()
+	else
+		MiniMapTrackingBorder:Hide()
+	end
 
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935) -- bloody hell
 	MiniMapTracking:SetParent(Minimap)
