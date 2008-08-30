@@ -31,13 +31,11 @@
 ---------------------------------------------------------------------------]]
 
 
--- global function
-function GetMinimapShape() return "SQUARE" end
+function GetMinimapShape() return 'SQUARE' end
 
--- addon fluff
 local _G = getfenv(0)
 local wotlk = select(4, GetBuildInfo()) >= 3e4
-local addon = CreateFrame("Frame", "pMinimap", Minimap)
+local addon = CreateFrame('Frame', 'pMinimap', Minimap)
 local frames = {
 	MinimapBorder,
 	MinimapBorderTop,
@@ -59,7 +57,7 @@ local frames = {
 
 function addon.PLAYER_LOGIN(self)
 	Minimap:EnableMouseWheel(true)
-	Minimap:SetScript("OnMouseWheel", function(self, dir)
+	Minimap:SetScript('OnMouseWheel', function(self, dir)
 		if(dir > 0) then
 			Minimap_ZoomIn()
 		else
@@ -73,65 +71,57 @@ function addon.PLAYER_LOGIN(self)
 	else
 		MiniMapTrackingBorder:Hide()
 	end
-	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935) -- bloody hell
+	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 	MiniMapTracking:SetParent(Minimap)
 	MiniMapTracking:ClearAllPoints()
-	MiniMapTracking:SetPoint("TOPLEFT", -2, 2)
+	MiniMapTracking:SetPoint('TOPLEFT', -2, 2)
 
 	MiniMapBattlefieldFrame:SetParent(Minimap)
 	MiniMapBattlefieldFrame:ClearAllPoints()
-	MiniMapBattlefieldFrame:SetPoint("TOPRIGHT", -2, -2)
+	MiniMapBattlefieldFrame:SetPoint('TOPRIGHT', -2, -2)
 
 	MiniMapMailFrame:SetParent(Minimap)
 	MiniMapMailFrame:ClearAllPoints()
-	MiniMapMailFrame:SetPoint("TOP")
+	MiniMapMailFrame:SetPoint('TOP')
 	MiniMapMailFrame:SetHeight(8)
 
-	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, "OVERLAY")
-	MiniMapMailText:SetFont("Interface\\AddOns\\pMinimap\\font.ttf", 13, "OUTLINE")
-	MiniMapMailText:SetPoint("BOTTOM", 0, 2)
-	MiniMapMailText:SetText("New Mail!")
+	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
+	MiniMapMailText:SetFont('Interface\\AddOns\\pMinimap\\font.ttf', 13, 'OUTLINE')
+	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
+	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
-	MinimapNorthTag:SetAlpha(0) -- it pops up on variables, this is an easy way out
-	DurabilityFrame:SetAlpha(0) -- it shows on events, another easy way out
+	MinimapNorthTag:SetAlpha(0)
+	DurabilityFrame:SetAlpha(0)
 
-	Minimap:SetMaskTexture("Interface\\ChatFrame\\ChatFrameBackground")
-	Minimap:SetFrameStrata("LOW")
+	Minimap:SetMaskTexture('Interface\\ChatFrame\\ChatFrameBackground')
+	Minimap:SetFrameStrata('LOW')
 
-	self:SetFrameStrata("BACKGROUND")
+	self:SetFrameStrata('BACKGROUND')
 	self:SetAllPoints(Minimap)
-	self:SetBackdrop({bgFile = "Interface\\ChatFrame\\ChatFrameBackground", insets = {top = -1, left = -1, bottom = -1, right = -1}})
+	self:SetBackdrop({bgFile = 'Interface\\ChatFrame\\ChatFrameBackground', insets = {top = -1, left = -1, bottom = -1, right = -1}})
 	self:SetBackdropColor(0, 0, 0)
 
-	-- hide all listed frames
-	for _,obj in pairs(frames) do obj:Hide() end
+	for x,obj in pairs(frames) do obj:Hide() end
 end
 
--- durability backdrop recoloring (props to Malreth of WoWAce)
 function addon.UPDATE_INVENTORY_ALERTS(self)
-	local db = _G.pMinimapDB
-	if(db.durability) then
-		local maxStatus = 0
-		for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
-			local status = GetInventoryAlertStatus(id)
-			if(status > maxStatus) then
-				maxStatus = status
-			end
+	local maxStatus = 0
+	for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
+		local status = GetInventoryAlertStatus(id)
+		if(status > maxStatus) then
+			maxStatus = status
 		end
+	end
 
-		local color = INVENTORY_ALERT_COLORS[maxStatus]
-		if(color) then
-			self:SetBackdropColor(color.r, color.g, color.b)
-		else
-			self:SetBackdropColor(0, 0, 0)
-		end
+	local color = INVENTORY_ALERT_COLORS[maxStatus]
+	if(color) then
+		self:SetBackdropColor(color.r, color.g, color.b)
 	else
-		self:UnregisterEvent("UPDATE_INVENTORY_ALERTS")
 		self:SetBackdropColor(0, 0, 0)
 	end
 end
 
-addon:SetScript("OnEvent", function(self, event, ...) self[event](self) end)
-addon:RegisterEvent("UPDATE_INVENTORY_ALERTS")
-addon:RegisterEvent("PLAYER_LOGIN")
+addon:SetScript('OnEvent', function(self, event, ...) self[event](self) end)
+addon:RegisterEvent('UPDATE_INVENTORY_ALERTS')
+addon:RegisterEvent('PLAYER_LOGIN')
