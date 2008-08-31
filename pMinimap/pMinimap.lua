@@ -33,7 +33,6 @@
 
 function GetMinimapShape() return 'SQUARE' end
 
-local _G = getfenv(0)
 local wotlk = select(4, GetBuildInfo()) >= 3e4
 local addon = CreateFrame('Frame', 'pMinimap', Minimap)
 local frames = {
