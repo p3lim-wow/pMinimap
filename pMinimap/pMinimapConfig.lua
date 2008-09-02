@@ -18,11 +18,11 @@ local function Options(self, anchor, db)
 				db.x = x
 				db.y = y
 				anchor:SetAlpha(0)
-				anchor:SetMovable(value)
+				anchor:EnableMouse(false)
 				anchor:SetFrameStrata('BACKGROUND')
 			else
 				anchor:SetAlpha(1)
-				anchor:SetMovable(value)
+				anchor:EnableMouse(true)
 				anchor:SetFrameStrata('DIALOG')
 			end
 		end)
@@ -92,16 +92,16 @@ local function OnEvent(self, name)
 		db.locked = true
 
 		local anchor = CreateFrame('Frame', nil, UIParent)
-		anchor:SetFrameStrata('BACKGROUND')
+		anchor:SetPoint(db.p1, UIParent, db.p2, db.x, db.y)
 		anchor:SetWidth(Minimap:GetWidth() * db.scale)
 		anchor:SetHeight(Minimap:GetHeight() * db.scale)
-		anchor:SetAlpha(0)
 		anchor:SetBackdrop({bgFile='Interface\\ChatFrame\\ChatFrameBackground'})
 		anchor:SetBackdropColor(0, 1, 0, 0.5)
+		anchor:SetAlpha(0)
+		anchor:SetMovable(true)
+		anchor:EnableMouse(false)
 		anchor:SetScript('OnMouseDown', function(self) self:StartMoving() end)
 		anchor:SetScript('OnMouseUp', function(self) self:StopMovingOrSizing() end)
-		anchor:SetPoint(db.p1, UIParent, db.p2, db.x, db.y)
-		anchor:EnableMouse(db.locked and false or true)
 
 		Minimap:ClearAllPoints()
 		Minimap:SetPoint('CENTER', anchor)
