@@ -71,6 +71,7 @@ local function Options(self, anchor, db)
 			db.durability = value
 			if(value) then
 				pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
+				pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
 				DurabilityFrame:SetAlpha(0)
 			else
 				pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
