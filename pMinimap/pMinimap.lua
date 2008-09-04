@@ -55,6 +55,7 @@ local frames = {
 }
 
 function addon.PLAYER_LOGIN(self)
+	local db = _G.pMinimapDB
 	Minimap:EnableMouseWheel(true)
 	Minimap:SetScript('OnMouseWheel', function(self, dir)
 		if(dir > 0) then
@@ -91,7 +92,7 @@ function addon.PLAYER_LOGIN(self)
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
 	MinimapNorthTag:SetAlpha(0)
-	DurabilityFrame:SetAlpha(0)
+	MiniMapMeetingStoneFrame:SetAlpha(0)
 
 	Minimap:SetMaskTexture('Interface\\ChatFrame\\ChatFrameBackground')
 	Minimap:SetFrameStrata('LOW')
@@ -99,7 +100,15 @@ function addon.PLAYER_LOGIN(self)
 	self:SetFrameStrata('BACKGROUND')
 	self:SetAllPoints(Minimap)
 	self:SetBackdrop({bgFile = 'Interface\\ChatFrame\\ChatFrameBackground', insets = {top = -1, left = -1, bottom = -1, right = -1}})
-	self:SetBackdropColor(0, 0, 0)
+	self:SetBackdropColor(0, 0, 0, 0)
+
+	if(db.backdrop) then
+		self:SetBackdropColor(0, 0, 0, 1)
+		if(db.durability) then
+			self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
+			DurabilityFrame:SetAlpha(0)
+		end
+	end
 
 	for x,obj in pairs(frames) do obj:Hide() end
 end
@@ -115,12 +124,11 @@ function addon.UPDATE_INVENTORY_ALERTS(self)
 
 	local color = INVENTORY_ALERT_COLORS[maxStatus]
 	if(color) then
-		self:SetBackdropColor(color.r, color.g, color.b)
+		self:SetBackdropColor(color.r, color.g, color.b, 1)
 	else
-		self:SetBackdropColor(0, 0, 0)
+		self:SetBackdropColor(0, 0, 0, 1)
 	end
 end
 
 addon:SetScript('OnEvent', function(self, event, ...) self[event](self) end)
-addon:RegisterEvent('UPDATE_INVENTORY_ALERTS')
 addon:RegisterEvent('PLAYER_LOGIN')

@@ -68,25 +68,53 @@ local function Options(self, anchor, db)
 		'default', true,
 		'current', db.durability,
 		'setFunc', function(value)
+			self:Refresh()
 			db.durability = value
-			if(value) then
-				pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
-				pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
-				DurabilityFrame:SetAlpha(0)
-			else
-				pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
-				pMinimap:SetBackdropColor(0, 0, 0)
-				DurabilityFrame:SetAlpha(1)
+			if(db.backdrop) then
+				if(value) then
+					pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
+					pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
+					DurabilityFrame:SetAlpha(0)
+				else
+					pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
+					pMinimap:SetBackdropColor(0, 0, 0, 1)
+					DurabilityFrame:SetAlpha(1)
+				end
 			end
 		end)
 	dura:SetPoint('TOPLEFT', scale, 'BOTTOMLEFT', 0, -8)
+
+	local bg = self:MakeToggle(
+		'name', 'Toggle Backdrop',
+		'description', 'Set whether backdrop is shown or not\nAlso forces durability recoloring',
+		'default', true,
+		'current', db.backdrop,
+		'setFunc', function(value)
+			self:Refresh()
+			db.backdrop = value
+			if(value) then
+				pMinimap:SetBackdropColor(0, 0, 0, 1)
+				if(db.durability) then
+					pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
+					pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
+					DurabilityFrame:SetAlpha(0)
+				end
+			else
+				pMinimap:SetBackdropColor(0, 0, 0, 0)
+				if(db.durability) then
+					pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
+					DurabilityFrame:SetAlpha(1)
+				end
+			end
+		end)
+	bg:SetPoint('TOPLEFT', dura, 'BOTTOMLEFT', 0, -8)
 end
 
 local function OnEvent(self, name)
 	if(name == 'pMinimap') then
 		local db = _G.pMinimapDB
 		if(not db) then
-			db = { p1 = 'TOPRIGHT', p2 = 'TOPRIGHT', x = -15, y = -15, scale = 0.9, locked = true, durability = true }
+			db = { p1 = 'TOPRIGHT', p2 = 'TOPRIGHT', x = -15, y = -15, scale = 0.9, locked = true, durability = true, backdrop = true }
 			_G.pMinimapDB = db
 		end
 
