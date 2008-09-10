@@ -33,7 +33,6 @@
 
 function GetMinimapShape() return 'SQUARE' end
 
-local wotlk = select(4, GetBuildInfo()) >= 3e4
 local addon = CreateFrame('Frame', 'pMinimap', Minimap)
 local frames = {
 	MinimapBorder,
@@ -56,6 +55,7 @@ local frames = {
 
 function addon.PLAYER_LOGIN(self)
 	local db = _G.pMinimapDB
+
 	Minimap:EnableMouseWheel(true)
 	Minimap:SetScript('OnMouseWheel', function(self, dir)
 		if(dir > 0) then
@@ -65,7 +65,7 @@ function addon.PLAYER_LOGIN(self)
 		end
 	end)
 
-	if(wotlk) then
+	if(select(4, GetBuildInfo()) >= 3e4) then
 		MiniMapTrackingIconOverlay:SetAlpha(0)
 		MiniMapTrackingButtonBorder:Hide()
 	else
@@ -104,13 +104,14 @@ function addon.PLAYER_LOGIN(self)
 
 	if(db.backdrop) then
 		self:SetBackdropColor(0, 0, 0, 1)
+
 		if(db.durability) then
 			self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
 			DurabilityFrame:SetAlpha(0)
 		end
 	end
 
-	for x,obj in pairs(frames) do obj:Hide() end
+	for i,obj in pairs(frames) do obj:Hide() end
 end
 
 function addon.UPDATE_INVENTORY_ALERTS(self)
