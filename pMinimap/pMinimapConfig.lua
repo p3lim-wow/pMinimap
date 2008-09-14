@@ -1,47 +1,29 @@
-local _G = getfenv(0)
+local locked = true
 local LibSimpleOptions = LibStub('LibSimpleOptions-1.0')
 
 local function Options(self, anchor, db)
 	local title, subText = self:MakeTitleTextAndSubText('pMinimap', 'These options allow you to change the position of pMinimap')
-
 	local lock = self:MakeToggle(
 		'name', 'Toggle Minimap Locked State',
 		'description', 'Set whether Minimap is locked or not',
 		'default', true,
-		'current', db.locked,
+		'current', locked,
 		'setFunc', function(value)
-			db.locked = value
+			locked = value
 			if(value) then
 				local p1, p, p2, x, y = anchor:GetPoint()
-				db.p1 = p1
-				db.p2 = p2
-				db.x = x
-				db.y = y
+				db.point[1] = p1
+				db.point[3] = p2
+				db.point[4] = x
+				db.point[5] = y
 				anchor:SetAlpha(0)
 				anchor:EnableMouse(false)
-				anchor:SetFrameStrata('BACKGROUND')
 			else
 				anchor:SetAlpha(1)
 				anchor:EnableMouse(true)
-				anchor:SetFrameStrata('DIALOG')
 			end
 		end)
 	lock:SetPoint('TOPLEFT', subText, 'BOTTOMLEFT', 0, -8)
-
-	local reset = self:MakeButton(
-		'name', 'Reset Position',
-		'description', 'Reset Minimap position to default',
-		'func', function()
-			db.p1 = 'TOPRIGHT'
-			db.p2 = 'TOPRIGHT'
-			db.x = -15
-			db.y = -15
-			db.locked = true
-			anchor:ClearAllPoints()
-			anchor:SetPoint(db.p1, UIParent, db.p2, db.x, db.y)
-			self:Refresh()
-		end)
-	reset:SetPoint('TOPLEFT', lock, 'BOTTOMLEFT', 0, -8)
 
 	local scale = self:MakeSlider(
 		'name', 'Minimap Scale',
@@ -59,8 +41,10 @@ local function Options(self, anchor, db)
 			anchor:SetWidth(Minimap:GetWidth() * value)
 			anchor:SetHeight(Minimap:GetHeight() * value)
 		end,
-		'currentTextFunc', function(num) return ('%.1f'):format(num) end)
-	scale:SetPoint('TOPLEFT', reset, 'BOTTOMLEFT', 0, -16)
+		'currentTextFunc', function(num)
+			return ('%.1f'):format(num)
+		end)
+	scale:SetPoint('TOPLEFT', lock, 'BOTTOMLEFT', 0, -16)
 
 	local dura = self:MakeToggle(
 		'name', 'Toggle Durability',
@@ -73,76 +57,61 @@ local function Options(self, anchor, db)
 			if(db.backdrop) then
 				if(value) then
 					pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
-					pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
+					pMinimap.UPDATE_INVENTORY_ALERTS()
 					DurabilityFrame:SetAlpha(0)
 				else
 					pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
-					pMinimap:SetBackdropColor(0, 0, 0, 1)
+					Minimap:SetBackdropColor(unpack(db.colors))
 					DurabilityFrame:SetAlpha(1)
 				end
 			end
 		end)
 	dura:SetPoint('TOPLEFT', scale, 'BOTTOMLEFT', 0, -8)
 
-	local bg = self:MakeToggle(
-		'name', 'Toggle Backdrop',
-		'description', 'Set whether backdrop is shown or not\nAlso forces durability recoloring',
-		'default', true,
-		'current', db.backdrop,
+	local offset = self:MakeSlider(
+		'name', 'Backdrop offset',
+		'description', 'Drag to change the bg border size',
+		'minText', '-1',
+		'maxText', '10',
+		'minValue', -1,
+		'maxValue', 10,
+		'step', 1,
+		'default', 1,
+		'current', db.offset,
 		'setFunc', function(value)
-			self:Refresh()
-			db.backdrop = value
-			if(value) then
-				pMinimap:SetBackdropColor(0, 0, 0, 1)
-				if(db.durability) then
-					pMinimap:RegisterEvent('UPDATE_INVENTORY_ALERTS')
-					pMinimap.UPDATE_INVENTORY_ALERTS(pMinimap)
-					DurabilityFrame:SetAlpha(0)
-				end
-			else
-				pMinimap:SetBackdropColor(0, 0, 0, 0)
-				if(db.durability) then
-					pMinimap:UnregisterEvent('UPDATE_INVENTORY_ALERTS')
-					DurabilityFrame:SetAlpha(1)
-				end
-			end
+			db.offset = value
+			Minimap:SetBackdrop({bgFile = [[Interface\ChatFrame\ChatFrameBackground]], insets = {top = - db.offset, left = - db.offset, bottom = - db.offset, right = - db.offset}})
+			Minimap:SetBackdropColor(unpack(db.colors))
+		end,
+		'currentTextFunc', function(num)
+			return ('%.0f'):format(num)
 		end)
-	bg:SetPoint('TOPLEFT', dura, 'BOTTOMLEFT', 0, -8)
+	offset:SetPoint('TOPLEFT', dura, 'BOTTOMLEFT', 0, -16)
+
+	local color = self:MakeColorPicker(
+		'name', "Custom Color",
+		'description', "Set custom bg color with a palette",
+		'hasAlpha', true,
+		'defaultR', 0,
+		'defaultG', 0,
+		'defaultB', 0,
+		'defaultA', 1,
+		'getFunc', function() return unpack(db.colors) end,
+		'setFunc', function(r, g, b, a)
+			db.colors[1] = r
+			db.colors[2] = g
+			db.colors[3] = b
+			db.colors[4] = a
+			Minimap:SetBackdropColor(unpack(db.colors))
+		end)
+	color:SetPoint("TOPLEFT", offset, "BOTTOMLEFT", 0, -8)
 end
 
-local function OnEvent(self, name)
-	if(name == 'pMinimap') then
-		local db = _G.pMinimapDB
-		if(not db) then
-			db = { p1 = 'TOPRIGHT', p2 = 'TOPRIGHT', x = -15, y = -15, scale = 0.9, locked = true, durability = true, backdrop = true }
-			_G.pMinimapDB = db
-		end
+function pMinimap:PLAYER_ENTERING_WORLD()
+	local db = pMinimapDB or {point = {'TOPRIGHT', 'UIParent', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true}
 
-		db.locked = true
+	LibSimpleOptions.AddOptionsPanel('pMinimap', function(self) Options(self, pMinimap, db) end)
+	LibSimpleOptions.AddSlashCommand('pMinimap', '/pminimap', '/pmm')
 
-		local anchor = CreateFrame('Frame', nil, UIParent)
-		anchor:SetPoint(db.p1, UIParent, db.p2, db.x, db.y)
-		anchor:SetWidth(Minimap:GetWidth() * db.scale)
-		anchor:SetHeight(Minimap:GetHeight() * db.scale)
-		anchor:SetBackdrop({bgFile='Interface\\ChatFrame\\ChatFrameBackground'})
-		anchor:SetBackdropColor(0, 1, 0, 0.5)
-		anchor:SetAlpha(0)
-		anchor:SetMovable(true)
-		anchor:EnableMouse(false)
-		anchor:SetScript('OnMouseDown', function(self) self:StartMoving() end)
-		anchor:SetScript('OnMouseUp', function(self) self:StopMovingOrSizing() end)
-
-		Minimap:ClearAllPoints()
-		Minimap:SetPoint('CENTER', anchor)
-		Minimap:SetScale(db.scale)
-
-		LibSimpleOptions.AddOptionsPanel('pMinimap', function(self) Options(self, anchor, db) end)
-		LibSimpleOptions.AddSlashCommand('pMinimap', '/pminimap', '/pmm')
-
-		self:UnregisterEvent('ADDON_LOADED')
-	end
+	pMinimapDB = db
 end
-
-local event = CreateFrame('Frame')
-event:RegisterEvent('ADDON_LOADED')
-event:SetScript('OnEvent', function(self, event, ...) OnEvent(self, ...) end)
