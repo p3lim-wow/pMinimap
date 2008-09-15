@@ -12,7 +12,7 @@ function pMinimap:ADDON_LOADED()
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
 	Minimap:EnableMouseWheel()
-	Minimap:SetScript('OnMouseWheel', function(dir)
+	Minimap:SetScript('OnMouseWheel', function(self, dir)
 		if(dir > 0) then
 			Minimap_ZoomIn()
 		else
