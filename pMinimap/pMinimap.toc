@@ -1,6 +1,6 @@
 ## Interface: 20400
 ## Author: p3lim
-## Version: Revision wowi:revision
+## Version: 20400.wowi:revision
 ## Title: |cffff6000p|rMinimap
 ## Notes: Yet another square minimap addon
 ## OptionalDeps: LibStub, LibSimpleOptions-1.0

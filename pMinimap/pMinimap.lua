@@ -1,5 +1,5 @@
 pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
-pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
+pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
 function pMinimap:ADDON_LOADED()

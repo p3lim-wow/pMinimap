@@ -90,11 +90,13 @@ local function CreateOptions(self, db)
 	):SetPoint('TOPLEFT', sub, 'BOTTOMLEFT', 0, -156)
 end
 	
-function pMinimap:PLAYER_ENTERING_WORLD()
+function pMinimap:PLAYER_ENTERING_WORLD(event)
 	local db = pMinimapDB or {point = {'TOPRIGHT', 'UIParent', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true}
 
 	LibStub('LibSimpleOptions-1.0').AddOptionsPanel('pMinimap', function(self) CreateOptions(self, db) end)
 	LibStub('LibSimpleOptions-1.0').AddSlashCommand('pMinimap', '/pminimap', '/pmm')
+
+	self:UnregisterEvent(event)
 
 	pMinimapDB = db
 end
