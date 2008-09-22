@@ -7,12 +7,13 @@ local function CreateOptions(self, db)
 		'default', true,
 		'current', true,
 		'setFunc', function(x)
-			pMinimap:EnableMouse(x)
 			if(x) then
 				local p,_,r,x,y = pMinimap:GetPoint()
 				db.point[1], db.point[3], db.point[4], db.point[5] = p, r, x, y
+				pMinimap:EnableMouse(false)
 				pMinimap:SetAlpha(0)
 			else
+				pMinimap:EnableMouse(true)
 				pMinimap:SetAlpha(1)
 			end
 		end
