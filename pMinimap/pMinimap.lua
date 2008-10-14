@@ -1,8 +1,8 @@
 pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
-pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
-function pMinimap:ADDON_LOADED()
+function pMinimap.ADDON_LOADED(self)
 	local db = pMinimapDB or {point = {'TOPRIGHT', UIParent, 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0}, durability = true}
 
 	MinimapBorder:SetTexture()
@@ -23,8 +23,9 @@ function pMinimap:ADDON_LOADED()
 	MinimapZoneText:Hide()
 	MinimapZoneTextButton:Hide()
 
-	MiniMapTrackingBorder:SetTexture()
+	MiniMapTrackingButtonBorder:SetTexture()
 	MiniMapTrackingBackground:Hide()
+	MiniMapTrackingIconOverlay:SetAlpha(0)
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 	MiniMapTracking:SetParent(Minimap)
 	MiniMapTracking:ClearAllPoints()
@@ -83,7 +84,7 @@ function pMinimap:ADDON_LOADED()
 	self:UnregisterEvent('ADDON_LOADED')
 end
 
-function pMinimap:UPDATE_INVENTORY_ALERTS()
+function pMinimap.UPDATE_INVENTORY_ALERTS()
 	local db = pMinimapDB or {colors = {0, 0, 0, 1}}
 	local maxStatus = 0
 	for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
