@@ -6,8 +6,8 @@
 ## OptionalDeps: LibStub, LibSimpleOptions-1.0
 ## SavedVariablesPerCharacter: pMinimapDB
 
-Libs\LibStub.lua
-Libs\LibSimpleOptions-1.0.lua
+LibSimpleOptions\LibStub\LibStub.lua
+LibSimpleOptions\LibSimpleOptions-1.0.lua
 
 pMinimap.lua
 pMinimapConfig.lua
