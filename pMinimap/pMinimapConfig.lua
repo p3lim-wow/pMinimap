@@ -23,9 +23,9 @@ local function CreateOptions(self, db)
 		'name', 'Minimap Scale',
 		'description', 'Drag to change the minimap scale',
 		'default', 0.9,
-		'minText', '0.5', 'maxText', '2.5',
-		'minValue', 0.5, 'maxValue', 2.5,
-		'step', 0.1,
+		'minText', '0.75', 'maxText', '2.50',
+		'minValue', 0.75, 'maxValue', 2.50,
+		'step', 0.01,
 		'current', db.scale,
 		'setFunc', function(x)
 			db.scale = x
@@ -34,7 +34,7 @@ local function CreateOptions(self, db)
 			pMinimap:SetHeight(Minimap:GetHeight() * x)
 		end,
 		'currentTextFunc', function(num)
-			return format('%.1f', num)
+			return format('%.2f', num)
 		end
 	):SetPoint('TOPLEFT', sub, 'BOTTOMLEFT', 0, -56)
 
