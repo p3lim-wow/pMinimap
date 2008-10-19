@@ -3,6 +3,10 @@ pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event
 pMinimap:RegisterEvent('ADDON_LOADED')
 
 function pMinimap.ADDON_LOADED(self)
+	if(not IsAddOnLoaded('Blizzard_TimeManager')) then
+		LoadAddOn('Blizzard_TimeManager')
+	end
+
 	local db = pMinimapDB or {point = {'TOPRIGHT', UIParent, 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0}, durability = true}
 
 	MinimapBorder:SetTexture()
@@ -49,6 +53,31 @@ function pMinimap.ADDON_LOADED(self)
 	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
+
+	TimeManagerClockButton:ClearAllPoints()
+	TimeManagerClockButton:SetPoint('BOTTOM', Minimap)
+	TimeManagerClockButton:SetWidth(40)
+	TimeManagerClockButton:SetHeight(14)
+	TimeManagerClockButton:GetRegions():Hide()
+	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
+	TimeManagerClockTicker:SetFont([=[Interface\AddOns\pMinimap\font.ttf]=], 13, 'OUTLINE')
+	TimeManagerAlarmFiredTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 0, 0) end
+	TimeManagerAlarmFiredTexture.Hide = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
+	TimeManagerClockButton:SetScript('OnClick', function(self, button)
+		if(self.alarmFiring) then
+			PlaySound('igMainMenuQuit')
+			TimeManager_TurnOffAlarm()
+		else
+			if(button == 'RightButton') then
+				if(not IsAddOnLoaded('Blizzard_Calendar')) then
+					LoadAddOn('Blizzard_Calendar')
+				end
+				ToggleCalendar()
+			else
+				ToggleTimeManager()
+			end
+		end
+	end)
 
 	GameTimeFrame:Hide()
 	MiniMapWorldMapButton:Hide()
