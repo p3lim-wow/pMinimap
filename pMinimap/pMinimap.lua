@@ -4,7 +4,7 @@ pMinimap:RegisterEvent('ADDON_LOADED')
 
 function pMinimap.ADDON_LOADED(self, event, name)
 	if(name ~= 'pMinimap') then return end
-	local db = _G.pMinimapDB or {point = {'TOPRIGHT', UIParent, 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0}, durability = true, coords = false}
+	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true}
 
 	MinimapBorder:SetTexture()
 	MinimapBorderTop:Hide()
@@ -58,7 +58,7 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	MiniMapMeetingStoneFrame:SetAlpha(0)
 	MinimapNorthTag:SetAlpha(0)
 
-	self:SetPoint(unpack(db.point))
+	self:SetPoint(db.point[1], UIParent, db.point[2], db.point[3], db.point[4])
 	self:SetWidth(Minimap:GetWidth() * db.scale)
 	self:SetHeight(Minimap:GetHeight() * db.scale)
 	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=]})
@@ -88,13 +88,15 @@ function pMinimap.ADDON_LOADED(self, event, name)
 		end
 	end
 
-	if(GetCVar('showClock') == '1') then
+	if(db.clock) then
 		if(not IsAddOnLoaded('pMinimap_Clock')) then
 			LoadAddOn('pMinimap_Clock')
 		end
 	end
 
 	self:UnregisterEvent(event)
+
+	pMinimapDB = db
 end
 
 SlashCmdList['PMMC'] = function()
