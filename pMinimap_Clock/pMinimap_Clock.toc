@@ -1,0 +1,9 @@
+## Interface: 30000
+## Author: p3lim
+## Version: 30000.wowi:revision
+## Title: |cffff6000p|rMinimap_Clock
+## Notes: Clock module for pMinimap
+## RequiredDeps: pMinimap
+## LoadOnDemand: 1
+
+pMinimap_Clock.lua
