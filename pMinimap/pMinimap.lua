@@ -2,12 +2,9 @@ pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
 pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
-function pMinimap.ADDON_LOADED(self)
-	if(not IsAddOnLoaded('Blizzard_TimeManager')) then
-		LoadAddOn('Blizzard_TimeManager')
-	end
-
-	local db = pMinimapDB or {point = {'TOPRIGHT', UIParent, 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0}, durability = true}
+function pMinimap.ADDON_LOADED(self, event, name)
+	if(name ~= 'pMinimap') then return end
+	local db = _G.pMinimapDB or {point = {'TOPRIGHT', UIParent, 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0}, durability = true, coords = false}
 
 	MinimapBorder:SetTexture()
 	MinimapBorderTop:Hide()
@@ -54,31 +51,6 @@ function pMinimap.ADDON_LOADED(self)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
-	TimeManagerClockButton:ClearAllPoints()
-	TimeManagerClockButton:SetPoint('BOTTOM', Minimap)
-	TimeManagerClockButton:SetWidth(40)
-	TimeManagerClockButton:SetHeight(14)
-	TimeManagerClockButton:GetRegions():Hide()
-	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
-	TimeManagerClockTicker:SetFont([=[Interface\AddOns\pMinimap\font.ttf]=], 13, 'OUTLINE')
-	TimeManagerAlarmFiredTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 0, 0) end
-	TimeManagerAlarmFiredTexture.Hide = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
-	TimeManagerClockButton:SetScript('OnClick', function(self, button)
-		if(self.alarmFiring) then
-			PlaySound('igMainMenuQuit')
-			TimeManager_TurnOffAlarm()
-		else
-			if(button == 'RightButton') then
-				if(not IsAddOnLoaded('Blizzard_Calendar')) then
-					LoadAddOn('Blizzard_Calendar')
-				end
-				ToggleCalendar()
-			else
-				ToggleTimeManager()
-			end
-		end
-	end)
-
 	GameTimeFrame:Hide()
 	MiniMapWorldMapButton:Hide()
 	MiniMapVoiceChatFrame:Hide()
@@ -105,31 +77,34 @@ function pMinimap.ADDON_LOADED(self)
 	Minimap:SetBackdropColor(unpack(db.colors))
 
 	if(db.durability) then
-		self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
-		DurabilityFrame:SetAlpha(0)
-	end
-
-	self:RegisterEvent('PLAYER_ENTERING_WORLD')
-	self:UnregisterEvent('ADDON_LOADED')
-end
-
-function pMinimap.UPDATE_INVENTORY_ALERTS()
-	local db = pMinimapDB or {colors = {0, 0, 0, 1}}
-	local maxStatus = 0
-	for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
-		local status = GetInventoryAlertStatus(id)
-		if(status > maxStatus) then
-			maxStatus = status
+		if(not IsAddOnLoaded('pMinimap_Durability')) then
+			LoadAddOn('pMinimap_Durability')
 		end
 	end
 
-	local color = INVENTORY_ALERT_COLORS[maxStatus]
-	if(color) then
-		Minimap:SetBackdropColor(color.r, color.g, color.b)
-	else
-		Minimap:SetBackdropColor(unpack(db.colors))
+	if(db.coords) then
+		if(not IsAddOnLoaded('pMinimap_Coords')) then
+			LoadAddOn('pMinimap_Coords')
+		end
 	end
+
+	if(GetCVar('showClock') == '1') then
+		if(not IsAddOnLoaded('pMinimap_Clock')) then
+			LoadAddOn('pMinimap_Clock')
+		end
+	end
+
+	self:UnregisterEvent(event)
 end
+
+SlashCmdList['PMMC'] = function()
+	if(not IsAddOnLoaded('pMinimap_Config')) then
+		LoadAddOn('pMinimap_Config')
+	end
+	InterfaceOptionsFrame_OpenToCategory('pMinimap')
+end
+SLASH_PMMC1 = '/pminimap'
+SLASH_PMMC2 = '/pmm'
 
 -- http://www.wowwiki.com/GetMinimapShape
 function GetMinimapShape() return 'SQUARE' end
