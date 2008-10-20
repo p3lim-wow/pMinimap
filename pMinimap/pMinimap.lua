@@ -2,6 +2,18 @@ pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
 pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
+pMinimapToggleClock = InterfaceOptionsDisplayPanelShowClock_SetFunc
+InterfaceOptionsDisplayPanelShowClock_SetFunc = function() end
+
+for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
+	local f = check:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+	f:SetPoint('TOPLEFT', check, 0, 10)
+	f:SetText('|cff00ff33OVERRID BY PMINIMAP!|r')
+
+	check:Disable()
+	check.Enable = function() end
+end
+
 function pMinimap.ADDON_LOADED(self, event, name)
 	if(name ~= 'pMinimap') then return end
 	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true}
