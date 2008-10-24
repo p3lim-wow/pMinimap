@@ -18,7 +18,7 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	if(name ~= 'pMinimap') then return end
 	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE'}
 
-	MinimapBorder:SetTexture()
+	MinimapBorder:SetTexture('')
 	MinimapBorderTop:Hide()
 	MinimapToggleButton:Hide()
 
@@ -36,22 +36,22 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	MinimapZoneText:Hide()
 	MinimapZoneTextButton:Hide()
 
-	MiniMapTrackingButtonBorder:SetTexture()
 	MiniMapTrackingBackground:Hide()
-	MiniMapTrackingIconOverlay:SetAlpha(0)
+	MiniMapTrackingButtonBorder:SetTexture('')
+	MiniMapTrackingButton:SetHighlightTexture('')
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 	MiniMapTracking:SetParent(Minimap)
 	MiniMapTracking:ClearAllPoints()
 	MiniMapTracking:SetPoint('TOPLEFT', -2, 2)
 
 	BattlegroundShine:Hide()
-	MiniMapBattlefieldBorder:SetTexture()
+	MiniMapBattlefieldBorder:SetTexture('')
 	MiniMapBattlefieldFrame:SetParent(Minimap)
 	MiniMapBattlefieldFrame:ClearAllPoints()
 	MiniMapBattlefieldFrame:SetPoint('TOPRIGHT', -2, -2)
 
-	MiniMapMailBorder:SetTexture()
 	MiniMapMailIcon:Hide()
+	MiniMapMailBorder:SetTexture('')
 	MiniMapMailFrame:SetParent(Minimap)
 	MiniMapMailFrame:ClearAllPoints()
 	MiniMapMailFrame:SetPoint('TOP')
@@ -69,9 +69,8 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	GameTimeCalendarInvitesTexture:SetPoint('CENTER')
 
 	MiniMapWorldMapButton:Hide()
-	MiniMapVoiceChatFrame:Hide()
-	MiniMapMeetingStoneFrame:Hide()
 	MiniMapMeetingStoneFrame:SetAlpha(0)
+	MiniMapVoiceChatFrame:SetAlpha(0)
 	MinimapNorthTag:SetAlpha(0)
 
 	self:SetPoint(db.point[1], UIParent, db.point[2], db.point[3], db.point[4])
