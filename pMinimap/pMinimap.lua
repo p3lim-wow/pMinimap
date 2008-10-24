@@ -16,7 +16,7 @@ end
 
 function pMinimap.ADDON_LOADED(self, event, name)
 	if(name ~= 'pMinimap') then return end
-	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true}
+	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE'}
 
 	MinimapBorder:SetTexture()
 	MinimapBorderTop:Hide()
@@ -58,12 +58,16 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	MiniMapMailFrame:SetHeight(8)
 
 	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
-	MiniMapMailText:SetFont([=[Interface\AddOns\pMinimap\font.ttf]=], 13, 'OUTLINE')
+	MiniMapMailText:SetFont(db.font, db.fontsize, db.fontflag == 'NONE' and nil or db.fontflag)
 	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
-	GameTimeFrame:Hide()
+	GameTimeFrame:SetAlpha(0)
+	GameTimeCalendarInvitesTexture:SetParent(Minimap)
+	GameTimeCalendarInvitesTexture:ClearAllPoints()
+	GameTimeCalendarInvitesTexture:SetPoint('CENTER')
+
 	MiniMapWorldMapButton:Hide()
 	MiniMapVoiceChatFrame:Hide()
 	MiniMapMeetingStoneFrame:Hide()
@@ -80,13 +84,18 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	self:EnableMouse(false)
 	self:SetScript('OnMouseDown', function() self:StartMoving() end)
 	self:SetScript('OnMouseUp', function() self:StopMovingOrSizing() end)
+	self:UnregisterEvent(event)
 
 	Minimap:ClearAllPoints()
 	Minimap:SetPoint('CENTER', self)
 	Minimap:SetScale(db.scale)
+	Minimap:SetFrameLevel(db.level)
+	Minimap:SetFrameStrata(db.strata)
 	Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
 	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - db.offset, left = - db.offset, bottom = - db.offset, right = - db.offset}})
 	Minimap:SetBackdropColor(unpack(db.colors))
+
+	pMinimapDB = db
 
 	if(db.durability) then
 		if(not IsAddOnLoaded('pMinimap_Durability')) then
@@ -105,10 +114,6 @@ function pMinimap.ADDON_LOADED(self, event, name)
 			LoadAddOn('pMinimap_Clock')
 		end
 	end
-
-	self:UnregisterEvent(event)
-
-	pMinimapDB = db
 end
 
 SlashCmdList['PMMC'] = function()
