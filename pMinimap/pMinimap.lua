@@ -1,9 +1,6 @@
 pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
-pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
+pMinimap:SetScript('OnEvent', function(self, event, ...) if(self[event]) then return self[event](self, event, ...) end end)
 pMinimap:RegisterEvent('ADDON_LOADED')
-
-pMinimapToggleClock = InterfaceOptionsDisplayPanelShowClock_SetFunc
-InterfaceOptionsDisplayPanelShowClock_SetFunc = function() end
 
 for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	local f = check:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
@@ -14,9 +11,9 @@ for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	check.Enable = function() end
 end
 
-function pMinimap.ADDON_LOADED(self, event, name)
-	if(name ~= 'pMinimap') then return end
-	local db = pMinimapDB or {point = {'TOPRIGHT', 'TOPRIGHT', -15, -15}, scale = 0.9, offset = 1, colors = {0, 0, 0, 1}, durability = true, coords = false, clock = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE'}
+function pMinimap:ADDON_LOADED(event)
+	pMinimapDB2 = pMinimapDB2 or {unlocked = false, p1 = 'TOPRIGHT', p2 = 'TOPRIGHT', x = -15, y = -15, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
+	pMinimapDB2.unlocked = false
 
 	MinimapBorder:SetTexture('')
 	MinimapBorderTop:Hide()
@@ -58,68 +55,56 @@ function pMinimap.ADDON_LOADED(self, event, name)
 	MiniMapMailFrame:SetHeight(8)
 
 	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
-	MiniMapMailText:SetFont(db.font, db.fontsize, db.fontflag == 'NONE' and nil or db.fontflag)
+	MiniMapMailText:SetFont(pMinimapDB2.font, pMinimapDB2.fontsize, pMinimapDB2.fontflag)
 	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
-	GameTimeFrame:SetAlpha(0)
-	GameTimeCalendarInvitesTexture:SetParent(Minimap)
-	GameTimeCalendarInvitesTexture:ClearAllPoints()
-	GameTimeCalendarInvitesTexture:SetPoint('CENTER')
-
+	GameTimeFrame:Hide()
 	MiniMapWorldMapButton:Hide()
 	MiniMapMeetingStoneFrame:SetAlpha(0)
-	MiniMapVoiceChatFrame:SetAlpha(0)
+	MiniMapVoiceChatFrame:Hide()
+	MiniMapVoiceChatFrame.Show = function() end
 	MinimapNorthTag:SetAlpha(0)
 
-	self:SetPoint(db.point[1], UIParent, db.point[2], db.point[3], db.point[4])
-	self:SetWidth(Minimap:GetWidth() * db.scale)
-	self:SetHeight(Minimap:GetHeight() * db.scale)
-	self:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=]})
-	self:SetBackdropColor(0, 1, 0, 0.5)
-	self:SetAlpha(0)
-	self:SetMovable(true)
-	self:EnableMouse(false)
-	self:SetScript('OnMouseDown', function() self:StartMoving() end)
-	self:SetScript('OnMouseUp', function() self:StopMovingOrSizing() end)
-	self:UnregisterEvent(event)
+	MinimapCluster:ClearAllPoints()
+	MinimapCluster:SetPoint(pMinimapDB2.p1, UIParent, pMinimapDB2.p2, pMinimapDB2.x, pMinimapDB2.y)
+	MinimapCluster:SetMovable(true)
 
-	Minimap:ClearAllPoints()
-	Minimap:SetPoint('CENTER', self)
-	Minimap:SetScale(db.scale)
-	Minimap:SetFrameLevel(db.level)
-	Minimap:SetFrameStrata(db.strata)
+	Minimap:SetScale(pMinimapDB2.scale)
+	Minimap:SetFrameLevel(pMinimapDB2.level)
+	Minimap:SetFrameStrata(pMinimapDB2.strata)
 	Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
-	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - db.offset, left = - db.offset, bottom = - db.offset, right = - db.offset}})
-	Minimap:SetBackdropColor(unpack(db.colors))
+	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB2.offset, left = - pMinimapDB2.offset, bottom = - pMinimapDB2.offset, right = - pMinimapDB2.offset}})
+	Minimap:SetBackdropColor(unpack(pMinimapDB2.colors))
+	Minimap:RegisterForDrag('LeftButton')
+	Minimap:SetScript('OnDragStart', function() if(pMinimapDB2.unlocked) then MinimapCluster:StartMoving() end end)
+	Minimap:SetScript('OnDragStop', function()
+		if(not pMinimapDB2.unlocked) then return end
+		MinimapCluster:StopMovingOrSizing()
+	
+		local p1, _, p2, x, y = MinimapCluster:GetPoint()
+		pMinimapDB2.p1, pMinimapDB2.p2, pMinimapDB2.x, pMinimapDB2.y = p1, p2, x, y
+	end)
 
-	pMinimapDB = db
+	InterfaceOptionsDisplayPanelShowClock_SetFunc('0')
 
-	if(db.durability) then
-		if(not IsAddOnLoaded('pMinimap_Durability')) then
-			LoadAddOn('pMinimap_Durability')
-		end
-	end
+	if(pMinimapDB2.coords and not IsAddOnLoaded('pMinimap_Coords')) then LoadAddOn('pMinimap_Coords') end
+	if(pMinimapDB2.clock and not IsAddOnLoaded('pMinimap_Clock')) then LoadAddOn('pMinimap_Clock') end
+	if(pMinimapDB2.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
 
-	if(db.coords) then
-		if(not IsAddOnLoaded('pMinimap_Coords')) then
-			LoadAddOn('pMinimap_Coords')
-		end
-	end
-
-	if(db.clock) then
-		if(not IsAddOnLoaded('pMinimap_Clock')) then
-			LoadAddOn('pMinimap_Clock')
-		end
-	end
+	pMinimap:UnregisterEvent(event)
 end
 
-SlashCmdList['PMMC'] = function()
-	if(not IsAddOnLoaded('pMinimap_Config')) then
-		LoadAddOn('pMinimap_Config')
+SlashCmdList['PMMC'] = function(str)
+	if(str:find('reset')) then
+		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
+	else
+		if(not IsAddOnLoaded('pMinimap_Config')) then
+			LoadAddOn('pMinimap_Config')
+		end
+		InterfaceOptionsFrame_OpenToCategory('pMinimap')
 	end
-	InterfaceOptionsFrame_OpenToCategory('pMinimap')
 end
 SLASH_PMMC1 = '/pminimap'
 SLASH_PMMC2 = '/pmm'
