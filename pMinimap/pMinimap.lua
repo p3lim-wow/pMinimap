@@ -2,6 +2,9 @@ pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
 pMinimap:SetScript('OnEvent', function(self, event, ...) if(self[event]) then return self[event](self, event, ...) end end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
+InterfaceOptionsDisplayPanelShowClock_SetFunc('1')
+InterfaceOptionsDisplayPanelShowClock_SetFunc = function() end
+
 for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	local f = check:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
 	f:SetPoint('TOPLEFT', check, 0, 10)
@@ -82,16 +85,15 @@ function pMinimap:ADDON_LOADED(event)
 	Minimap:SetScript('OnDragStop', function()
 		if(not pMinimapDB2.unlocked) then return end
 		MinimapCluster:StopMovingOrSizing()
-	
+
 		local p1, _, p2, x, y = MinimapCluster:GetPoint()
 		pMinimapDB2.p1, pMinimapDB2.p2, pMinimapDB2.x, pMinimapDB2.y = p1, p2, x, y
 	end)
 
-	InterfaceOptionsDisplayPanelShowClock_SetFunc('0')
-
+	if(pMinimapDB2.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
 	if(pMinimapDB2.coords and not IsAddOnLoaded('pMinimap_Coords')) then LoadAddOn('pMinimap_Coords') end
 	if(pMinimapDB2.clock and not IsAddOnLoaded('pMinimap_Clock')) then LoadAddOn('pMinimap_Clock') end
-	if(pMinimapDB2.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
+	if(not pMinimapDB2.clock) then TimeManagerClockButton:Hide() end
 
 	pMinimap:UnregisterEvent(event)
 end
