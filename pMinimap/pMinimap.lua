@@ -14,13 +14,23 @@ for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	check.Enable = function() end
 end
 
+local orig = Minimap_Update
+function Minimap_Update(...) orig(...) MinimapZoneText:SetAlpha(0) end
+
 function pMinimap:ADDON_LOADED(event)
-	pMinimapDB2 = pMinimapDB2 or {unlocked = false, p1 = 'TOPRIGHT', p2 = 'TOPRIGHT', x = -15, y = -15, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
+	pMinimapDB2 = pMinimapDB2 or {unlocked = false, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, subzone = false, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
 	pMinimapDB2.unlocked = false
 
-	MinimapBorder:SetTexture('')
-	MinimapBorderTop:Hide()
-	MinimapToggleButton:Hide()
+	MinimapZoneText:ClearAllPoints()
+	MinimapZoneText:SetPoint('TOP', Minimap, 0, 15)
+	MinimapZoneText:SetFont(pMinimapDB2.font, pMinimapDB2.fontsize, pMinimapDB2.fontflag)
+	MinimapZoneText:SetDrawLayer('OVERLAY')
+	MinimapZoneText:SetParent(Minimap)
+	MinimapZoneText:SetAlpha(0)
+	MinimapZoneTextButton:Hide()
+
+	Minimap:SetScript('OnEnter', function() if(pMinimapDB2.subzone) then MinimapZoneText:SetAlpha(1) end end)
+	Minimap:SetScript('OnLeave', function() if(pMinimapDB2.subzone) then UIFrameFadeOut(MinimapZoneText, 1.5) end end)	
 
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
@@ -33,12 +43,10 @@ function pMinimap:ADDON_LOADED(event)
 		end
 	end)
 
-	MinimapZoneText:Hide()
-	MinimapZoneTextButton:Hide()
-
 	MiniMapTrackingBackground:Hide()
 	MiniMapTrackingButtonBorder:SetTexture('')
 	MiniMapTrackingButton:SetHighlightTexture('')
+	MiniMapTrackingIconOverlay:SetTexture('')
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 	MiniMapTracking:SetParent(Minimap)
 	MiniMapTracking:ClearAllPoints()
@@ -63,6 +71,10 @@ function pMinimap:ADDON_LOADED(event)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
 
+	MinimapBorder:SetTexture('')
+	MinimapBorderTop:Hide()
+	MinimapToggleButton:Hide()
+
 	GameTimeFrame:Hide()
 	MiniMapWorldMapButton:Hide()
 	MiniMapMeetingStoneFrame:SetAlpha(0)
@@ -70,8 +82,6 @@ function pMinimap:ADDON_LOADED(event)
 	MiniMapVoiceChatFrame.Show = function() end
 	MinimapNorthTag:SetAlpha(0)
 
-	MinimapCluster:ClearAllPoints()
-	MinimapCluster:SetPoint(pMinimapDB2.p1, UIParent, pMinimapDB2.p2, pMinimapDB2.x, pMinimapDB2.y)
 	MinimapCluster:SetMovable(true)
 
 	Minimap:SetScale(pMinimapDB2.scale)
@@ -81,13 +91,12 @@ function pMinimap:ADDON_LOADED(event)
 	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB2.offset, left = - pMinimapDB2.offset, bottom = - pMinimapDB2.offset, right = - pMinimapDB2.offset}})
 	Minimap:SetBackdropColor(unpack(pMinimapDB2.colors))
 	Minimap:RegisterForDrag('LeftButton')
-	Minimap:SetScript('OnDragStart', function() if(pMinimapDB2.unlocked) then MinimapCluster:StartMoving() end end)
-	Minimap:SetScript('OnDragStop', function()
-		if(not pMinimapDB2.unlocked) then return end
-		MinimapCluster:StopMovingOrSizing()
-
-		local p1, _, p2, x, y = MinimapCluster:GetPoint()
-		pMinimapDB2.p1, pMinimapDB2.p2, pMinimapDB2.x, pMinimapDB2.y = p1, p2, x, y
+	Minimap:SetScript('OnDragStop', function() if(pMinimapDB2.unlocked) then MinimapCluster:StopMovingOrSizing() end end)
+	Minimap:SetScript('OnDragStart', function()
+		if(pMinimapDB2.unlocked) then
+			MinimapCluster:ClearAllPoints()
+			MinimapCluster:StartMoving()
+		end
 	end)
 
 	if(pMinimapDB2.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
