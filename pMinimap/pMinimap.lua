@@ -27,6 +27,7 @@ function pMinimap:ADDON_LOADED(event)
 	MinimapZoneText:SetDrawLayer('OVERLAY')
 	MinimapZoneText:SetParent(Minimap)
 	MinimapZoneText:SetAlpha(0)
+	MinimapZoneText:SetWidth(220)
 	MinimapZoneTextButton:Hide()
 
 	Minimap:SetScript('OnEnter', function() if(pMinimapDB2.subzone) then MinimapZoneText:SetAlpha(1) end end)
