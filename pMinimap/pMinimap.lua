@@ -14,24 +14,22 @@ for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	check.Enable = function() end
 end
 
-local orig = Minimap_Update
-function Minimap_Update(...) orig(...) MinimapZoneText:SetAlpha(0) end
-
 function pMinimap:ADDON_LOADED(event)
-	pMinimapDB2 = pMinimapDB2 or {unlocked = false, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, subzone = false, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
+	pMinimapDB2 = pMinimapDB2 or {unlocked = false, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, mail = true, subzone = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
 	pMinimapDB2.unlocked = false
+	self:UnregisterEvent(event)
 
-	MinimapZoneText:ClearAllPoints()
-	MinimapZoneText:SetPoint('TOP', Minimap, 0, 15)
-	MinimapZoneText:SetFont(pMinimapDB2.font, pMinimapDB2.fontsize, pMinimapDB2.fontflag)
-	MinimapZoneText:SetDrawLayer('OVERLAY')
-	MinimapZoneText:SetParent(Minimap)
-	MinimapZoneText:SetAlpha(0)
-	MinimapZoneText:SetWidth(220)
-	MinimapZoneTextButton:Hide()
-
-	Minimap:SetScript('OnEnter', function() if(pMinimapDB2.subzone) then MinimapZoneText:SetAlpha(1) end end)
-	Minimap:SetScript('OnLeave', function() if(pMinimapDB2.subzone) then UIFrameFadeOut(MinimapZoneText, 1.5) end end)	
+	Minimap:SetScript('OnLeave', function() GameTooltip:Hide() end)
+	Minimap:SetScript('OnEnter', function(self)
+		if(pMinimapDB2.subzone) then
+			GameTooltip:SetOwner(self, 'ANCHOR_BOTTOMLEFT')
+			local typ, sub, name, o1, o2 = GetZonePVPInfo(), GameTooltip.IsOwned, GameTooltip.SetOwner
+			GameTooltip.IsOwned, GameTooltip.SetOwner = function() return true end, function() end
+			Minimap_SetTooltip(typ, name)
+			GameTooltip.IsOwned, GameTooltip.SetOwner = o1, o2
+			GameTooltip:Show()
+		end
+	end)
 
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
@@ -77,6 +75,7 @@ function pMinimap:ADDON_LOADED(event)
 	MinimapToggleButton:Hide()
 
 	GameTimeFrame:Hide()
+	MinimapZoneTextButton:Hide()
 	MiniMapWorldMapButton:Hide()
 	MiniMapMeetingStoneFrame:SetAlpha(0)
 	MiniMapVoiceChatFrame:Hide()
@@ -104,8 +103,10 @@ function pMinimap:ADDON_LOADED(event)
 	if(pMinimapDB2.coords and not IsAddOnLoaded('pMinimap_Coords')) then LoadAddOn('pMinimap_Coords') end
 	if(pMinimapDB2.clock and not IsAddOnLoaded('pMinimap_Clock')) then LoadAddOn('pMinimap_Clock') end
 	if(not pMinimapDB2.clock) then TimeManagerClockButton:Hide() end
-
-	pMinimap:UnregisterEvent(event)
+	if(not pMinimapDB2.mail) then
+		MiniMapMailFrame:UnregisterEvent('UPDATE_PENDING_MAIL')
+		MiniMapMailFrame:Hide()
+	end
 end
 
 SlashCmdList['PMMC'] = function(str)
