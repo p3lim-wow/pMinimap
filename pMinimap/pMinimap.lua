@@ -19,19 +19,6 @@ function pMinimap:ADDON_LOADED(event)
 	pMinimapDB2.unlocked = false
 	self:UnregisterEvent(event)
 
-	Minimap:SetScript('OnLeave', function() GameTooltip:Hide() end)
-	Minimap:SetScript('OnEnter', function(self)
-		if(pMinimapDB2.subzone) then
-			GameTooltip:SetOwner(self, 'ANCHOR_BOTTOMLEFT')
-			local o1, o2 = GameTooltip.IsOwned, GameTooltip.SetOwner
-			local typ, sub, name = GetZonePVPInfo()
-			GameTooltip.IsOwned, GameTooltip.SetOwner = function() return true end, function() end
-			Minimap_SetTooltip(typ, name)
-			GameTooltip.IsOwned, GameTooltip.SetOwner = o1, o2
-			GameTooltip:Show()
-		end
-	end)
-
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
 	Minimap:EnableMouseWheel()
