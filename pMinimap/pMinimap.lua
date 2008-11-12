@@ -2,6 +2,23 @@ pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
 pMinimap:SetScript('OnEvent', function(self, event, ...) if(self[event]) then return self[event](self, event, ...) end end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
+local defaults = {
+	coords = false,
+	clock = true,
+	durabi = true,
+	mail = true,
+	subzone = false,
+	unlocked = false,
+	scale = 0.9,
+	offset = 1,
+	level = 2,
+	strata = 'BACKGROUND',
+	font = 'Interface\\AddOns\\pMinimap\\font.ttf',
+	fontsize = 13,
+	fontflag = 'OUTLINE',
+	colors = {0, 0, 0, 1},
+}
+
 InterfaceOptionsDisplayPanelShowClock_SetFunc('1')
 InterfaceOptionsDisplayPanelShowClock_SetFunc = function() end
 
@@ -15,8 +32,14 @@ for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 end
 
 function pMinimap:ADDON_LOADED(event)
-	pMinimapDB2 = pMinimapDB2 or {unlocked = false, scale = 0.9, offset = 1, dura = true, coords = false, clock = true, mail = true, subzone = true, level = 2, strata = 'BACKGROUND', font = 'Interface\\AddOns\\pMinimap\\font.ttf', fontsize = 13, fontflag = 'OUTLINE', colors = {0, 0, 0, 1}}
-	pMinimapDB2.unlocked = false
+	pMinimapDB = pMinimapDB or {}
+	for k,v in pairs(defaults) do
+		if(type(pMinimapDB[k]) == 'nil') then
+			pMinimapDB[k] = v
+		end
+	end
+
+	pMinimapDB.unlocked = false
 	self:UnregisterEvent(event)
 
 	MinimapZoomIn:Hide()
@@ -53,7 +76,7 @@ function pMinimap:ADDON_LOADED(event)
 	MiniMapMailFrame:SetHeight(8)
 
 	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
-	MiniMapMailText:SetFont(pMinimapDB2.font, pMinimapDB2.fontsize, pMinimapDB2.fontflag)
+	MiniMapMailText:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
 	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
 	MiniMapMailText:SetText('New Mail!')
 	MiniMapMailText:SetTextColor(1, 1, 1)
@@ -70,28 +93,28 @@ function pMinimap:ADDON_LOADED(event)
 	MiniMapVoiceChatFrame.Show = function() end
 	MinimapNorthTag:SetAlpha(0)
 
-	MinimapCluster:SetMovable(true)
-
-	Minimap:SetScale(pMinimapDB2.scale)
-	Minimap:SetFrameLevel(pMinimapDB2.level)
-	Minimap:SetFrameStrata(pMinimapDB2.strata)
+	Minimap:SetScale(pMinimapDB.scale)
+	Minimap:SetFrameLevel(pMinimapDB.level)
+	Minimap:SetFrameStrata(pMinimapDB.strata)
 	Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
-	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB2.offset, left = - pMinimapDB2.offset, bottom = - pMinimapDB2.offset, right = - pMinimapDB2.offset}})
-	Minimap:SetBackdropColor(unpack(pMinimapDB2.colors))
+	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB.offset, left = - pMinimapDB.offset, bottom = - pMinimapDB.offset, right = - pMinimapDB.offset}})
+	Minimap:SetBackdropColor(unpack(pMinimapDB.colors))
+
+	MinimapCluster:SetMovable(true)
 	Minimap:RegisterForDrag('LeftButton')
-	Minimap:SetScript('OnDragStop', function() if(pMinimapDB2.unlocked) then MinimapCluster:StopMovingOrSizing() end end)
+	Minimap:SetScript('OnDragStop', function() if(pMinimapDB.unlocked) then MinimapCluster:StopMovingOrSizing() end end)
 	Minimap:SetScript('OnDragStart', function()
-		if(pMinimapDB2.unlocked) then
+		if(pMinimapDB.unlocked) then
 			MinimapCluster:ClearAllPoints()
 			MinimapCluster:StartMoving()
 		end
 	end)
 
-	if(pMinimapDB2.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
-	if(pMinimapDB2.coords and not IsAddOnLoaded('pMinimap_Coords')) then LoadAddOn('pMinimap_Coords') end
-	if(pMinimapDB2.clock and not IsAddOnLoaded('pMinimap_Clock')) then LoadAddOn('pMinimap_Clock') end
-	if(not pMinimapDB2.clock) then TimeManagerClockButton:Hide() end
-	if(not pMinimapDB2.mail) then
+	if(pMinimapDB.dura and not IsAddOnLoaded('pMinimap_Durability')) then LoadAddOn('pMinimap_Durability') end
+	if(pMinimapDB.coords and not IsAddOnLoaded('pMinimap_Coords')) then LoadAddOn('pMinimap_Coords') end
+	if(pMinimapDB.clock and not IsAddOnLoaded('pMinimap_Clock')) then LoadAddOn('pMinimap_Clock') end
+	if(not pMinimapDB.clock) then TimeManagerClockButton:Hide() end
+	if(not pMinimapDB.mail) then
 		MiniMapMailFrame:UnregisterEvent('UPDATE_PENDING_MAIL')
 		MiniMapMailFrame:Hide()
 	end

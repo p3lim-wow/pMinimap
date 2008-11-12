@@ -3,6 +3,6 @@
 ## Version: 30000.wowi:revision
 ## Title: |cffff6000p|rMinimap
 ## Notes: Yet another square minimap addon
-## SavedVariablesPerCharacter: pMinimapDB2
+## SavedVariablesPerCharacter: pMinimapDB
 
 pMinimap.lua
