@@ -31,7 +31,9 @@ for _, check in pairs{InterfaceOptionsDisplayPanelShowClock} do
 	check.Enable = function() end
 end
 
-function pMinimap:ADDON_LOADED(event)
+function pMinimap:ADDON_LOADED(event, addon)
+	if(addon ~= 'pMinimap') then return end
+
 	pMinimapDB = pMinimapDB or {}
 	for k,v in pairs(defaults) do
 		if(type(pMinimapDB[k]) == 'nil') then
@@ -122,7 +124,11 @@ end
 
 SlashCmdList['PMMC'] = function(str)
 	if(str:find('reset')) then
+		pMinimapDB = {}
+		print('|cffff6000p|rMinimap: |cff0090ffSavedvariables is now reset.|r')
+	elseif(str:find('refresh')) then
 		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
+		print('|cffff6000p|rMinimap: |cff0090ffMinimap mask is now refreshed.|r')
 	else
 		if(not IsAddOnLoaded('pMinimap_Config')) then
 			LoadAddOn('pMinimap_Config')
