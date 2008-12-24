@@ -120,7 +120,13 @@ function pMinimap:ADDON_LOADED(event, addon)
 		MiniMapMailFrame:UnregisterEvent('UPDATE_PENDING_MAIL')
 		MiniMapMailFrame:Hide()
 	end
+
+	local f = CreateFrame('Frame', nil, InterfaceOptionsFrame)
+	f:SetScript('OnShow', function(self) LoadAddOn('OmniCC_Options') self:SetScript('OnShow', nil) end)
 end
+
+CreateFrame('Frame', nil, InterfaceOptionsFrame):SetScript('OnShow', function(self)
+if(not IsAddOnLoaded('pMinimap_Config')) then LoadAddOn('pMinimap_Config') end self:SetScript('OnShow', nil) end)
 
 SlashCmdList['PMMC'] = function(str)
 	if(str:find('reset')) then
