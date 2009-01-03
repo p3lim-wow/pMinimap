@@ -102,13 +102,14 @@ function pMinimap:ADDON_LOADED(event, addon)
 	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB.offset, left = - pMinimapDB.offset, bottom = - pMinimapDB.offset, right = - pMinimapDB.offset}})
 	Minimap:SetBackdropColor(unpack(pMinimapDB.colors))
 
-	MinimapCluster:SetMovable(true)
+	MinimapCluster:EnableMouse(false)
+	Minimap:SetMovable(true)
 	Minimap:RegisterForDrag('LeftButton')
-	Minimap:SetScript('OnDragStop', function() if(pMinimapDB.unlocked) then MinimapCluster:StopMovingOrSizing() end end)
+	Minimap:SetScript('OnDragStop', function() if(pMinimapDB.unlocked) then Minimap:StopMovingOrSizing() end end)
 	Minimap:SetScript('OnDragStart', function()
 		if(pMinimapDB.unlocked) then
-			MinimapCluster:ClearAllPoints()
-			MinimapCluster:StartMoving()
+			Minimap:ClearAllPoints()
+			Minimap:StartMoving()
 		end
 	end)
 
@@ -128,11 +129,11 @@ end
 CreateFrame('Frame', nil, InterfaceOptionsFrame):SetScript('OnShow', function(self)
 if(not IsAddOnLoaded('pMinimap_Config')) then LoadAddOn('pMinimap_Config') end self:SetScript('OnShow', nil) end)
 
-SlashCmdList['PMMC'] = function(str)
-	if(str:find('reset')) then
+SlashCmdList.PMMC = function(str)
+	if(str == 'reset') then
 		pMinimapDB = {}
 		print('|cffff6000p|rMinimap: |cff0090ffSavedvariables is now reset.|r')
-	elseif(str:find('refresh')) then
+	elseif(str == 'refresh') then
 		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
 		print('|cffff6000p|rMinimap: |cff0090ffMinimap mask is now refreshed.|r')
 	else
