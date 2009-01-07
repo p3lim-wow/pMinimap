@@ -121,9 +121,6 @@ function pMinimap:ADDON_LOADED(event, addon)
 		MiniMapMailFrame:UnregisterEvent('UPDATE_PENDING_MAIL')
 		MiniMapMailFrame:Hide()
 	end
-
-	local f = CreateFrame('Frame', nil, InterfaceOptionsFrame)
-	f:SetScript('OnShow', function(self) LoadAddOn('OmniCC_Options') self:SetScript('OnShow', nil) end)
 end
 
 CreateFrame('Frame', nil, InterfaceOptionsFrame):SetScript('OnShow', function(self)
