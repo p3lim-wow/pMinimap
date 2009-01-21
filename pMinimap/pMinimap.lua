@@ -34,8 +34,8 @@ function pMinimap:DisableBlizzard()
 		v.Enable = v.Disable
 	end
 
-	InterfaceOptionsDisplayPanelShowClock_SetFunc('1')
-	InterfaceOptionsDisplayPanelShowClock_SetFunc = function() end
+	InterfaceOptionsDisplayPanelShowClock.setFunc('1')
+	InterfaceOptionsDisplayPanelShowClock.setFunc = function() end
 end
 
 function pMinimap:LoadDefaults()
