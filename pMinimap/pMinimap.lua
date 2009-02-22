@@ -21,6 +21,10 @@ local defaults = {
 	fontsize = 13,
 	fontflag = 'OUTLINE',
 	colors = {0, 0, 0, 1},
+	zone = false,
+	zonePoint1 = 'BOTTOM',
+	zonePoint2 = 'TOP',
+	zoneOffset = 8,
 }
 
 
@@ -179,12 +183,20 @@ function pMinimap:ADDON_LOADED(event, addon)
 	self.Mail:SetText('New Mail!')
 	self.Mail:SetTextColor(1, 1, 1)
 
+	MinimapZoneTextButton:SetParent(Minimap)
+	MinimapZoneTextButton:ClearAllPoints()
+	MinimapZoneTextButton:SetPoint(pMinimapDB.zonePoint1, Minimap, pMinimapDB.zonePoint2, 0, pMinimapDB.zoneOffset)
+	MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
+
+	MinimapZoneText:ClearAllPoints()
+	MinimapZoneText:SetAllPoints(MinimapZoneTextButton)
+	MinimapZoneText:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
+
 	MinimapBorder:SetTexture('')
 	MinimapBorderTop:Hide()
 	MinimapToggleButton:Hide()
 
 	GameTimeFrame:Hide()
-	MinimapZoneTextButton:Hide()
 	MiniMapWorldMapButton:Hide()
 	MiniMapMeetingStoneFrame:SetAlpha(0)
 	MiniMapVoiceChatFrame:Hide()
@@ -208,6 +220,10 @@ function pMinimap:ADDON_LOADED(event, addon)
 			Minimap:StartMoving()
 		end
 	end)
+
+	if(not pMinimapDB.zone) then
+		MinimapZoneTextButton:Hide()
+	end
 
 	if(pMinimapDB.dura) then
 		DurabilityFrame:SetAlpha(0)
@@ -242,7 +258,7 @@ SlashCmdList.PMMC = function(str)
 	if(str == 'reset') then
 		pMinimapDB = {}
 		pMinimap:LoadDefaults()
-		print('|cffff8080pMinimap:|r Savedvariables is now reset.')
+		print('|cffff8080pMinimap:|r Savedvariables is now reset. You should reload/relog to affect changes.')
 	elseif(str == 'refresh') then
 		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
 		print('|cffff8080pMinimap:|r Minimap mask is now refreshed.')
