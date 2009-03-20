@@ -2,10 +2,12 @@ pMinimap = CreateFrame('Frame', 'pMinimap', UIParent)
 pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, event, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
-pMinimap.Loader = CreateFrame('Frame', nil, InterfaceOptionsFrame)
-pMinimap.Loader:SetScript('OnShow', function(self) if(not IsAddOnLoaded('pMinimap_Config')) then LoadAddOn('pMinimap_Config') end self:SetScript('OnShow', nil) end)
+local dummy = CreateFrame('Frame', nil, InterfaceOptionsFrame)
+dummy:SetScript('OnShow', function(self) if(not IsAddOnLoaded('pMinimap_Config')) then LoadAddOn('pMinimap_Config') end self:SetScript('OnShow', nil) end)
 
-local total = 0
+local LSM = LibStub('LibSharedMedia-3.0')
+
+local onUpdate
 local defaults = {
 	coords = false,
 	clock = true,
@@ -17,7 +19,7 @@ local defaults = {
 	offset = 1,
 	level = 2,
 	strata = 'BACKGROUND',
-	font = 'Interface\\AddOns\\pMinimap\\font.ttf',
+	font = 'Visitor TT1',
 	fontsize = 13,
 	fontflag = 'OUTLINE',
 	colors = {0, 0, 0, 1},
@@ -27,9 +29,27 @@ local defaults = {
 	zoneOffset = 8,
 }
 
+do
+	local total = 0.25
+	function onUpdate(self, elapsed)
+		if(total) then
+			total = total - elapsed
+			if(total <= 0) then
+				if(IsInInstance()) then
+					self.Text:SetText() -- add value in 3.1
+				else
+					local x, y = GetPlayerMapPosition('player')
+					self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
+				end
 
-function pMinimap:DisableBlizzard()
-	for k,v in pairs({InterfaceOptionsDisplayPanelShowClock}) do
+				total = 0.25
+			end
+		end
+	end
+end
+
+local function DisableBlizzard()
+	for k,v in next, {InterfaceOptionsDisplayPanelShowClock} do
 		local warning = v:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
 		warning:SetPoint('TOPLEFT', v, 0, 10)
 		warning:SetText('|cff00ff33OVERRID BY PMINIMAP!|r')
@@ -42,17 +62,35 @@ function pMinimap:DisableBlizzard()
 	InterfaceOptionsDisplayPanelShowClock.setFunc = function() end
 end
 
-function pMinimap:LoadDefaults()
+local function LoadDefaults()
 	pMinimapDB = pMinimapDB or {}
 	for k,v in pairs(defaults) do
 		if(type(pMinimapDB[k]) == 'nil') then
 			pMinimapDB[k] = v
 		end
 	end
+
+	pMinimapDB.unlocked = false
+end
+
+local function SlashCommand(str)
+	if(str == 'reset') then
+		pMinimapDB = {}
+		LoadDefaults()
+		print('|cffff8080pMinimap:|r Savedvariables is now reset. You should reload/relog to affect changes.')
+	elseif(str == 'refresh') then
+		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
+		print('|cffff8080pMinimap:|r Minimap mask is now refreshed.')
+	else
+		if(not IsAddOnLoaded('pMinimap_Config')) then
+			LoadAddOn('pMinimap_Config')
+		end
+		InterfaceOptionsFrame_OpenToCategory('pMinimap')
+	end
 end
 
 
-function pMinimap:CreateClock()
+local function CreateClock(self)
 	if(not IsAddOnLoaded('Blizzard_TimeManager')) then LoadAddOn('Blizzard_TimeManager') end
 
 	TimeManagerClockButton:SetWidth(40)
@@ -76,7 +114,8 @@ function pMinimap:CreateClock()
 	end)
 
 	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
-	TimeManagerClockTicker:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
+	TimeManagerClockTicker:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	TimeManagerClockTicker:SetShadowOffset(0, 0)
 
 	TimeManagerAlarmFiredTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 0, 0) end
 	TimeManagerAlarmFiredTexture.Hide = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
@@ -85,7 +124,7 @@ function pMinimap:CreateClock()
 	GameTimeCalendarInvitesTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
 end
 
-function pMinimap:CreateCoords()
+local function CreateCoords(self)
 	self.Coord = CreateFrame('Button', nil, Minimap)
 	self.Coord:SetPoint(pMinimapDB.clock and 'BOTTOMRIGHT' or 'BOTTOM', Minimap)
 	self.Coord:SetWidth(40)
@@ -94,23 +133,11 @@ function pMinimap:CreateCoords()
 
 	self.Coord.Text = self.Coord:CreateFontString(nil, 'OVERLAY')
 	self.Coord.Text:SetPoint('CENTER', self.Coord)
-	self.Coord.Text:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
+	self.Coord.Text:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	self.Coord.Text:SetTextColor(1, 1, 1)
 
 	self.Coord:SetScript('OnClick', function() ToggleFrame(WorldMapFrame) end)
-	self.Coord:SetScript('OnUpdate', function(self, elapsed)
-		total = total + elapsed
-
-		if(total > 0.25) then
-			if(IsInInstance()) then
-				self.Text:SetText()
-			else
-				local x, y = GetPlayerMapPosition('player')
-				self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
-			end
-			total = 0
-		end
-	end)
+	self.Coord:SetScript('OnUpdate', onUpdate)
 end
 
 
@@ -135,15 +162,7 @@ function pMinimap:UPDATE_INVENTORY_ALERTS()
 	end
 end
 
-function pMinimap:ADDON_LOADED(event, addon)
-	if(addon ~= 'pMinimap') then return end
-
-	self:UnregisterEvent(event)	
-	self:DisableBlizzard()
-	self:LoadDefaults()
-
-	pMinimapDB.unlocked = false
-
+local function Initialize(self)
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
 	Minimap:EnableMouseWheel()
@@ -174,11 +193,11 @@ function pMinimap:ADDON_LOADED(event, addon)
 	MiniMapMailBorder:SetTexture('')
 	MiniMapMailFrame:SetParent(Minimap)
 	MiniMapMailFrame:ClearAllPoints()
-	MiniMapMailFrame:SetPoint('TOP')
+	MiniMapMailFrame:SetPoint('TOP', 0, -4)
 	MiniMapMailFrame:SetHeight(8)
 
 	self.Mail = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
-	self.Mail:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
+	self.Mail:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	self.Mail:SetPoint('BOTTOM', 0, 2)
 	self.Mail:SetText('New Mail!')
 	self.Mail:SetTextColor(1, 1, 1)
@@ -190,7 +209,8 @@ function pMinimap:ADDON_LOADED(event, addon)
 
 	MinimapZoneText:ClearAllPoints()
 	MinimapZoneText:SetAllPoints(MinimapZoneTextButton)
-	MinimapZoneText:SetFont(pMinimapDB.font, pMinimapDB.fontsize, pMinimapDB.fontflag)
+	MinimapZoneText:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	MinimapZoneText:SetShadowOffset(0, 0)
 
 	MinimapBorder:SetTexture('')
 	MinimapBorderTop:Hide()
@@ -234,13 +254,13 @@ function pMinimap:ADDON_LOADED(event, addon)
 
 	if(pMinimapDB.coords) then
 		self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
-		self:CreateCoords()
 		self.RunCoords = true
+		CreateCoords(self)
 	end
 
 	if(pMinimapDB.clock) then
-		self:CreateClock()
 		self.RunClock = true
+		CreateClock(self)
 	else
 		TimeManagerClockButton:Hide()
 	end
@@ -252,22 +272,22 @@ function pMinimap:ADDON_LOADED(event, addon)
 end
 
 
-SLASH_PMMC1 = '/pmm'
-SLASH_PMMC2 = '/pminimap'
-SlashCmdList.PMMC = function(str)
-	if(str == 'reset') then
-		pMinimapDB = {}
-		pMinimap:LoadDefaults()
-		print('|cffff8080pMinimap:|r Savedvariables is now reset. You should reload/relog to affect changes.')
-	elseif(str == 'refresh') then
-		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
-		print('|cffff8080pMinimap:|r Minimap mask is now refreshed.')
-	else
-		if(not IsAddOnLoaded('pMinimap_Config')) then
-			LoadAddOn('pMinimap_Config')
-		end
-		InterfaceOptionsFrame_OpenToCategory('pMinimap')
-	end
+function pMinimap:ADDON_LOADED(event, addon)
+	if(addon ~= 'pMinimap') then return end
+
+	self:UnregisterEvent(event)	
+	DisableBlizzard()
+
+	SLASH_PMINIMAP1 = '/pmm'
+	SLASH_PMINIMAP2 = '/pminimap'
+	SlashCmdList.PMINIMAP = SlashCommand
+
+	LSM:Register('font', 'Visitor TT1', [=[Interface\AddOns\pMinimap\font.ttf]=])
+	LoadDefaults()
+	Initialize(self)
+
+	self.CreateClock = CreateClock
+	self.CreateCoords = CreateCoords
 end
 
 

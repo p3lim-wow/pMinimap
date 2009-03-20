@@ -4,5 +4,10 @@
 ## Title: |cffff6000p|rMinimap
 ## Notes: Yet another square minimap addon
 ## SavedVariablesPerCharacter: pMinimapDB
+## OptionalDeps: LibSharedMedia-3.0
+
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\LibSharedMedia-3.0\Lib.xml
 
 pMinimap.lua
