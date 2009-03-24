@@ -7,7 +7,7 @@ dummy:SetScript('OnShow', function(self) if(not IsAddOnLoaded('pMinimap_Config')
 
 local LSM = LibStub('LibSharedMedia-3.0')
 
-local onUpdate
+local onUpdate, onClickClock, onClickCoord, onMouseWheel
 local defaults = {
 	coords = false,
 	clock = true,
@@ -19,7 +19,7 @@ local defaults = {
 	offset = 1,
 	level = 2,
 	strata = 'BACKGROUND',
-	font = 'Visitor TT1',
+	smfont = 'Visitor TT1',
 	fontsize = 13,
 	fontflag = 'OUTLINE',
 	colors = {0, 0, 0, 1},
@@ -30,23 +30,55 @@ local defaults = {
 }
 
 do
+	local build = select(2, GetBuildInfo()) -- temporary, remove in 3.1
+
 	local total = 0.25
 	function onUpdate(self, elapsed)
 		if(total) then
 			total = total - elapsed
 			if(total <= 0) then
-				if(IsInInstance()) then
-					self.Text:SetText() -- add value in 3.1
+				total = 0.25
+
+				if(IsInInstance() and build == 9551) then -- only remove coordinates in instance for 3.0.9, remove this in 3.1
+					self.Text:SetText() 
 				else
 					local x, y = GetPlayerMapPosition('player')
 					self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
 				end
-
-				total = 0.25
 			end
 		end
 	end
+
+	function onClickClock(self, button)
+		if(button == 'RightButton') then
+			ToggleCalendar()
+		else
+			if(self.alarmFiring) then
+				PlaySound('igMainMenuQuit')
+				TimeManager_TurnOffAlarm()
+			else
+				ToggleTimeManager()
+			end
+		end
+	end
+
+	function onClickCoord(self, button)
+		if(button == 'RightButton') then
+			ToggleBattlefieldMinimap()
+		else
+			ToggleFrame(WorldMapFrame)
+		end
+	end
+
+	function onMouseWheel(self, dir)
+		if(dir > 0) then
+			MinimapZoomIn:Click()
+		else
+			MinimapZoomOut:Click()
+		end
+	end
 end
+
 
 local function DisableBlizzard()
 	for k,v in next, {InterfaceOptionsDisplayPanelShowClock} do
@@ -54,8 +86,7 @@ local function DisableBlizzard()
 		warning:SetPoint('TOPLEFT', v, 0, 10)
 		warning:SetText('|cff00ff33OVERRID BY PMINIMAP!|r')
 
-		v:Disable()
-		v.Enable = v.Disable
+		v:SetButtonState('DISABLED', true)
 	end
 
 	InterfaceOptionsDisplayPanelShowClock.setFunc('1')
@@ -91,7 +122,7 @@ end
 
 
 local function CreateClock(self)
-	if(not IsAddOnLoaded('Blizzard_TimeManager')) then LoadAddOn('Blizzard_TimeManager') end
+	TimeManager_LoadUI()
 
 	TimeManagerClockButton:SetWidth(40)
 	TimeManagerClockButton:SetHeight(14)
@@ -99,29 +130,19 @@ local function CreateClock(self)
 	TimeManagerClockButton:SetPoint(pMinimapDB.coords and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
 	TimeManagerClockButton:GetRegions():Hide()
 	TimeManagerClockButton:Show()
-	TimeManagerClockButton:SetScript('OnClick', function(self, button)
-		if(self.alarmFiring) then
-			PlaySound('igMainMenuQuit')
-			TimeManager_TurnOffAlarm()
-		else
-			if(button == 'RightButton') then
-				if(not IsAddOnLoaded('Blizzard_Calendar')) then LoadAddOn('Blizzard_Calendar') end
-				ToggleCalendar()
-			else
-				ToggleTimeManager()
-			end
-		end
-	end)
+	TimeManagerClockButton:SetScript('OnClick', onClickClock)
 
 	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
-	TimeManagerClockTicker:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	TimeManagerClockTicker:SetFont(LSM:Fetch('font', pMinimapDB.smfont), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	TimeManagerClockTicker:SetShadowOffset(0, 0)
 
 	TimeManagerAlarmFiredTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 0, 0) end
 	TimeManagerAlarmFiredTexture.Hide = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
 
-	GameTimeCalendarInvitesTexture.Show = function() TimeManagerClockTicker:SetTextColor(0, 1, 0) end
-	GameTimeCalendarInvitesTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 1, 1) end
+	self:RegisterEvent('CALENDAR_UPDATE_PENDING_INVITES')
+	self.CALENDAR_UPDATE_PENDING_INVITES()
+
+	self.RunClock = true
 end
 
 local function CreateCoords(self)
@@ -133,28 +154,38 @@ local function CreateCoords(self)
 
 	self.Coord.Text = self.Coord:CreateFontString(nil, 'OVERLAY')
 	self.Coord.Text:SetPoint('CENTER', self.Coord)
-	self.Coord.Text:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	self.Coord.Text:SetFont(LSM:Fetch('font', pMinimapDB.smfont), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	self.Coord.Text:SetTextColor(1, 1, 1)
 
-	self.Coord:SetScript('OnClick', function() ToggleFrame(WorldMapFrame) end)
+	self.Coord:SetScript('OnClick', onClickCoord)
 	self.Coord:SetScript('OnUpdate', onUpdate)
+
+	self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
+	self.RunCoords = true
 end
 
+function pMinimap:CALENDAR_UPDATE_PENDING_INVITES()
+	if(CalendarGetNumPendingInvites() ~= 0) then
+		TimeManagerClockTicker:SetTextColor(0, 1, 0)
+	else
+		TimeManagerClockTicker:SetTextColor(1, 1, 1)
+	end
+end
 
 function pMinimap:ZONE_CHANGED_NEW_AREA()
 	SetMapToCurrentZone()
 end
 
 function pMinimap:UPDATE_INVENTORY_ALERTS()
-	local maxStatus = 0
-	for id in pairs(INVENTORY_ALERT_STATUS_SLOTS) do
-		local status = GetInventoryAlertStatus(id)
-		if(status > maxStatus) then
-			maxStatus = status
+	local highstatus = 0
+	for i in next, INVENTORY_ALERT_STATUS_SLOTS do
+		local status = GetInventoryAlertStatus(i)
+		if(status > highstatus) then
+			highstatus = status
 		end
 	end
 
-	local color = INVENTORY_ALERT_COLORS[maxStatus]
+	local color = INVENTORY_ALERT_COLORS[highstatus]
 	if(color) then
 		Minimap:SetBackdropColor(color.r, color.g, color.b)
 	else
@@ -165,14 +196,6 @@ end
 local function Initialize(self)
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
-	Minimap:EnableMouseWheel()
-	Minimap:SetScript('OnMouseWheel', function(self, dir)
-		if(dir > 0) then
-			Minimap_ZoomIn()
-		else
-			Minimap_ZoomOut()
-		end
-	end)
 
 	MiniMapTrackingBackground:Hide()
 	MiniMapTrackingButton:SetHighlightTexture('')
@@ -189,18 +212,17 @@ local function Initialize(self)
 	MiniMapBattlefieldFrame:ClearAllPoints()
 	MiniMapBattlefieldFrame:SetPoint('TOPRIGHT', -2, -2)
 
-	MiniMapMailIcon:Hide()
 	MiniMapMailBorder:SetTexture('')
 	MiniMapMailFrame:SetParent(Minimap)
 	MiniMapMailFrame:ClearAllPoints()
 	MiniMapMailFrame:SetPoint('TOP', 0, -4)
 	MiniMapMailFrame:SetHeight(8)
 
-	self.Mail = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
-	self.Mail:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
-	self.Mail:SetPoint('BOTTOM', 0, 2)
-	self.Mail:SetText('New Mail!')
-	self.Mail:SetTextColor(1, 1, 1)
+	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
+	MiniMapMailText:SetFont(LSM:Fetch('font', pMinimapDB.smfont), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
+	MiniMapMailText:SetText('New Mail!')
+	MiniMapMailText:SetTextColor(1, 1, 1)
 
 	MinimapZoneTextButton:SetParent(Minimap)
 	MinimapZoneTextButton:ClearAllPoints()
@@ -209,7 +231,7 @@ local function Initialize(self)
 
 	MinimapZoneText:ClearAllPoints()
 	MinimapZoneText:SetAllPoints(MinimapZoneTextButton)
-	MinimapZoneText:SetFont(LSM:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	MinimapZoneText:SetFont(LSM:Fetch('font', pMinimapDB.smfont), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	MinimapZoneText:SetShadowOffset(0, 0)
 
 	MinimapBorder:SetTexture('')
@@ -223,6 +245,8 @@ local function Initialize(self)
 	MiniMapVoiceChatFrame.Show = MiniMapVoiceChatFrame.Hide
 	MinimapNorthTag:SetAlpha(0)
 
+	Minimap:EnableMouseWheel()
+	Minimap:SetScript('OnMouseWheel', onMouseWheel)
 	Minimap:SetScale(pMinimapDB.scale)
 	Minimap:SetFrameLevel(pMinimapDB.level)
 	Minimap:SetFrameStrata(pMinimapDB.strata)
@@ -234,12 +258,7 @@ local function Initialize(self)
 	Minimap:SetMovable(true)
 	Minimap:RegisterForDrag('LeftButton')
 	Minimap:SetScript('OnDragStop', function() if(pMinimapDB.unlocked) then Minimap:StopMovingOrSizing() end end)
-	Minimap:SetScript('OnDragStart', function()
-		if(pMinimapDB.unlocked) then
-			Minimap:ClearAllPoints()
-			Minimap:StartMoving()
-		end
-	end)
+	Minimap:SetScript('OnDragStart', function() if(pMinimapDB.unlocked) then Minimap:StartMoving() end end)
 
 	if(not pMinimapDB.zone) then
 		MinimapZoneTextButton:Hide()
@@ -253,21 +272,17 @@ local function Initialize(self)
 	end
 
 	if(pMinimapDB.coords) then
-		self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
-		self.RunCoords = true
 		CreateCoords(self)
 	end
 
 	if(pMinimapDB.clock) then
-		self.RunClock = true
 		CreateClock(self)
 	else
 		TimeManagerClockButton:Hide()
 	end
 
 	if(not pMinimapDB.mail) then
-		MiniMapMailFrame:UnregisterEvent('UPDATE_PENDING_MAIL')
-		MiniMapMailFrame:Hide()
+		MiniMapMailIcon:Hide()
 	end
 end
 
