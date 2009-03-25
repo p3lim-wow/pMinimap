@@ -281,8 +281,10 @@ local function Initialize(self)
 		TimeManagerClockButton:Hide()
 	end
 
-	if(not pMinimapDB.mail) then
+	if(pMinimapDB.mail) then
 		MiniMapMailIcon:Hide()
+	else
+		MiniMapMailText:Hide()
 	end
 end
 
