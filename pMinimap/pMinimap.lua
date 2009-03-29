@@ -24,13 +24,12 @@ local defaults = {
 	fontflag = 'OUTLINE',
 	colors = {0, 0, 0, 1},
 	zone = false,
-	zonePoint1 = 'BOTTOM',
-	zonePoint2 = 'TOP',
+	zonePoint = 'TOP',
 	zoneOffset = 8,
 }
 
 do
-	local build = select(2, GetBuildInfo()) -- temporary, remove in 3.1
+	local ptr = select(4, GetBuildInfo()) > 3e4 -- temporary, remove in 3.1
 
 	local total = 0.25
 	function onUpdate(self, elapsed)
@@ -39,7 +38,7 @@ do
 			if(total <= 0) then
 				total = 0.25
 
-				if(IsInInstance() and build == 9551) then -- only remove coordinates in instance for 3.0.9, remove this in 3.1
+				if(IsInInstance() and not ptr) then -- only remove coordinates in instance for 3.0.9, remove this in 3.1
 					self.Text:SetText() 
 				else
 					local x, y = GetPlayerMapPosition('player')
@@ -226,7 +225,7 @@ local function Initialize(self)
 
 	MinimapZoneTextButton:SetParent(Minimap)
 	MinimapZoneTextButton:ClearAllPoints()
-	MinimapZoneTextButton:SetPoint(pMinimapDB.zonePoint1, Minimap, pMinimapDB.zonePoint2, 0, pMinimapDB.zoneOffset)
+	MinimapZoneTextButton:SetPoint(pMinimapDB.zonePoint == 'BOTTOM' and 'TOP' or 'BOTTOM', Minimap, pMinimapDB.zonePoint, 0, pMinimapDB.zoneOffset)
 	MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
 
 	MinimapZoneText:ClearAllPoints()
@@ -292,6 +291,7 @@ end
 function pMinimap:ADDON_LOADED(event, addon)
 	if(addon ~= 'pMinimap') then return end
 
+	self.onUpdate = onUpdate
 	self:UnregisterEvent(event)	
 	DisableBlizzard()
 
