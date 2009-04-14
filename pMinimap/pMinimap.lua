@@ -26,8 +26,6 @@ local defaults = {
 }
 
 do
-	local ptr = select(4, GetBuildInfo()) > 3e4 -- temporary, remove in 3.1
-
 	local total = 0.25
 	function onUpdate(self, elapsed)
 		if(total) then
@@ -35,12 +33,8 @@ do
 			if(total <= 0) then
 				total = 0.25
 
-				if(IsInInstance() and not ptr) then -- only remove coordinates in instance for 3.0.9, remove this in 3.1
-					self.Text:SetText() 
-				else
-					local x, y = GetPlayerMapPosition('player')
-					self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
-				end
+				local x, y = GetPlayerMapPosition('player')
+				self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
 			end
 		end
 	end
@@ -78,8 +72,7 @@ end
 
 local function slashHandler(str)
 	if(str == 'reset') then
-		pMinimapDB = nil
-		pMinimap:LoadDefaults()
+		pMinimapDB = {}
 		print('|cffff8080pMinimap:|r Savedvariables is now reset. You should reload/relog to affect changes.')
 	elseif(str == 'refresh') then
 		Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
@@ -198,13 +191,6 @@ local function Initialize(self)
 end
 
 
-function pMinimap:LoadDefaults()
-	pMinimapDB = setmetatable(pMinimapDB or {}, {__index = defaults})
-	pMinimapDB.unlocked = false
-
-	self.db = pMinimapDB
-end
-
 function pMinimap:CreateClock()
 	TimeManager_LoadUI()
 
@@ -250,7 +236,6 @@ end
 
 function pMinimap:ADDON_LOADED(event, addon)
 	if(addon ~= 'pMinimap') then return end
-	self:UnregisterEvent(event)
 
 	CreateFrame('Frame', nil, InterfaceOptionsFrame):SetScript('OnShow', optionsPanel)
 	LSM:Register('font', 'Visitor TT1', [=[Interface\AddOns\pMinimap\font.ttf]=])
@@ -259,8 +244,12 @@ function pMinimap:ADDON_LOADED(event, addon)
 	SLASH_PMINIMAP2 = '/pminimap'
 	SlashCmdList.PMINIMAP = slashHandler
 
-	self:LoadDefaults()
+	pMinimapDB = setmetatable(pMinimapDB or {}, {__index = defaults})
+	pMinimapDB.unlocked = false
+
+	self.db = pMinimapDB
 	self.onCoordUpdate = onUpdate
+	self:UnregisterEvent(event)
 
 	InterfaceOptionsDisplayPanelShowClock.setFunc('1')
 	InterfaceOptionsDisplayPanelShowClock.setFunc = function() end
