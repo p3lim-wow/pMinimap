@@ -34,7 +34,11 @@ do
 				total = 0.25
 
 				local x, y = GetPlayerMapPosition('player')
-				self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
+				if(x ~= 0 and y ~= 0 and not IsInInstance()) then
+					self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
+				else
+					self.Text:SetText()
+				end
 			end
 		end
 	end
@@ -96,6 +100,8 @@ local function optionsPanel(self)
 end
 
 local function Initialize(self)
+	Minimap:EnableMouseWheel()
+	Minimap:SetScript('OnMouseWheel', onMouseWheel)
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
 
@@ -147,8 +153,6 @@ local function Initialize(self)
 	MiniMapVoiceChatFrame.Show = MiniMapVoiceChatFrame.Hide
 	MinimapNorthTag:SetAlpha(0)
 
-	Minimap:EnableMouseWheel()
-	Minimap:SetScript('OnMouseWheel', onMouseWheel)
 	Minimap:SetScale(self.db.scale)
 	Minimap:SetFrameLevel(self.db.level)
 	Minimap:SetFrameStrata(self.db.strata)
@@ -248,7 +252,6 @@ function pMinimap:ADDON_LOADED(event, addon)
 	pMinimapDB.unlocked = false
 
 	self.db = pMinimapDB
-	self.onCoordUpdate = onUpdate
 	self:UnregisterEvent(event)
 
 	InterfaceOptionsDisplayPanelShowClock.setFunc('1')
