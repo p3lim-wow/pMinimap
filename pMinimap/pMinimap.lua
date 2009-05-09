@@ -18,6 +18,7 @@ local LSM = LibStub('LibSharedMedia-3.0')
 local onUpdate, onClickClock, onClickCoord, onMouseWheel
 local defaults = {
 	coords = false,
+	coordsDecimals = 0,
 	clock = true,
 	dura = true,
 	mail = true,
@@ -46,7 +47,7 @@ do
 
 				local x, y = GetPlayerMapPosition('player')
 				if(x ~= 0 and y ~= 0 and not IsInInstance()) then
-					self.Text:SetFormattedText('%.0f,%.0f', x * 100, y * 100)
+					self.Text:SetFormattedText('%.'..pMinimapDB.coordsDecimals..'f,%.'..pMinimapDB.coordsDecimals..'f', x * 100, y * 100)
 				else
 					self.Text:SetText()
 				end
@@ -238,7 +239,7 @@ function pMinimap:CreateCoords()
 	self.Coord:RegisterForClicks('AnyUp')
 
 	self.Coord.Text = self.Coord:CreateFontString(nil, 'OVERLAY')
-	self.Coord.Text:SetPoint('CENTER', self.Coord)
+	self.Coord.Text:SetPoint('BOTTOMRIGHT', self.Coord)
 	self.Coord.Text:SetFont(LSM:Fetch('font', self.db.smfont), self.db.fontsize, self.db.fontflag)
 	self.Coord.Text:SetTextColor(1, 1, 1)
 
