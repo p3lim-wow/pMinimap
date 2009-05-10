@@ -46,7 +46,7 @@ do
 				total = 0.25
 
 				local x, y = GetPlayerMapPosition('player')
-				if(x ~= 0 and y ~= 0 and not IsInInstance()) then
+				if(x ~= 0 and y ~= 0) then
 					self.Text:SetFormattedText('%.'..pMinimapDB.coordsDecimals..'f,%.'..pMinimapDB.coordsDecimals..'f', x * 100, y * 100)
 				else
 					self.Text:SetText()
