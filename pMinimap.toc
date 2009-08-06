@@ -12,4 +12,6 @@ libs\LibSharedMedia-3.0.lua
 
 pMinimap.lua
 
+libs\tekKonfig\tekKonfig.xml
+
 pMinimap_Config.lua
