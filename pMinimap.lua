@@ -77,7 +77,7 @@ function addon:OnClick(button)
 end
 
 function addon:OnUpdate(elapsed)
-	if(total <= 0) then
+	if(self.total <= 0) then
 		local x, y = GetPlayerMapPosition('player')
 		if(x ~= 0 and y ~= 0) then
 			MinimapCoordinatesText:SetFormattedText('%.' .. addon.db.coordinatesdecimals .. 'f,%.' .. addon.db.coordinatesdecimals .. 'f', x * 100, y * 100)
@@ -201,11 +201,7 @@ function addon:Style()
 		DurabilityFrame:SetAlpha(0)
 
 		self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
-		self.UPDATE_INVENTORY_ALERTS()
-	end
-
-	if(self.db.coordinates) then
-		self:Coordinates()
+		self:UPDATE_INVENTORY_ALERTS()
 	end
 --[[
 	if(self.db.clock) then
@@ -257,7 +253,7 @@ function addon:UPDATE_INVENTORY_ALERTS()
 	local highstatus = 0
 	for k in next, INVENTORY_ALERT_STATUS_SLOTS do
 		local status = GetInventoryAlertStatus(k)
-		highstatus = status > highstatus and status
+		highstatus = status > highstatus and status or highstatus
 	end
 
 	local color = INVENTORY_ALERT_COLORS[highstatus]
