@@ -232,14 +232,9 @@ function addon:ADDON_LOADED(event, name)
 	self.db = setmetatable(pMinimapDB or {}, {__index = defaults})
 	self:UnregisterEvent(event)
 	self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
---	self:RegisterEvent('PLAYER_LOGOUT')
 
 	self:Style()
 end
-
---function addon:PLAYER_LOGOUT()
---	pMinimapDB = self.db
---end
 
 function addon:CALENDAR_UPDATE_PENDING_INVITES()
 	if(CalendarGetNumPendingInvites() ~= 0) then
