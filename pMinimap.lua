@@ -217,7 +217,7 @@ end
 
 function addon.Command(str)
 	if(str == 'reset') then
-		addon.db = {}
+		pMinimapDB = defaults
 		print('|cffff8080pMinimap:|r Settings reset. You should reload/relog to affect changes.')
 	else
 		InterfaceOptionsFrame_OpenToCategory(addon:GetName())
@@ -255,8 +255,8 @@ end
 
 function addon:UPDATE_INVENTORY_ALERTS()
 	local highstatus = 0
-	for index = 1, #INVENTORY_ALERT_STATUS_SLOTS do
-		local status = GetInventoryAlertStatus(INVENTORY_ALERT_STATUS_SLOTS[index])
+	for k in next, INVENTORY_ALERT_STATUS_SLOTS do
+		local status = GetInventoryAlertStatus(k)
 		highstatus = status > highstatus and status
 	end
 
