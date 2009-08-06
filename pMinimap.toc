@@ -14,4 +14,4 @@ pMinimap.lua
 
 libs\tekKonfig\tekKonfig.xml
 
-pMinimap_Config.lua
+pMinimapConfig.lua
