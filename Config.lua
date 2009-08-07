@@ -62,9 +62,9 @@ local function dropFontflag(orig)
 		orig.text:SetText(self.value)
 	end
 
-	for k, v in next, {OUTLINE = 'Normal Outline', THICKOUTLINE = 'Thick Outline', MONOCHROME = 'Monochrome', NONE = 'None'} do
+	for k, v in next, {'OUTLINE', 'THICKOUTLINE', 'MONOCHROME', 'NONE'} do
 		info.text = v
-		info.value = k
+		info.value = v
 		UIDropDownMenu_AddButton(info)
 	end
 end
@@ -79,18 +79,21 @@ addon:SetScript('OnShow', function(self)
 	group1:SetHeight(120)
 	group1:SetWidth(370)
 
-	local scale = slider.new(self, 'Scale', 0.5, 2.5, 'TOPLEFT', group1, 15, -15)
+	local scale, scaletext = slider.new(self, format('Scale: %.2f', pMinimap.db.scale), 0.5, 2.5, 'TOPLEFT', group1, 15, -15)
 	scale:SetValueStep(0.01)
 	scale:SetValue(pMinimap.db.scale)
 	scale:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.scale = value
+		scaletext:SetFormattedText('Scale: %.2f', value)
 		Minimap:SetScale(value)
 	end)
 
-	local level = slider.new(self, 'Framelevel', 1, 15, 'TOPLEFT', scale, 'BOTTOMLEFT', 0, -20)
+	local level, leveltext = slider.new(self, 'Framelevel: '..pMinimap.db.level, 1, 15, 'TOPLEFT', scale, 'BOTTOMLEFT', 0, -20)
+	level:SetValueStep(1)
 	level:SetValue(pMinimap.db.level)
 	level:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.level = value
+		leveltext:SetFormattedText('Framelevel: %d', value)
 		pMinimap:SetFrameLevel(value)
 	end)
 
@@ -117,10 +120,12 @@ addon:SetScript('OnShow', function(self)
 		end
 	end)
 
-	local coordinatesdecimals = slider.new(self, 'Coordinates Decimals', 0, 3, 'TOPRIGHT', group2, -15, -15)
+	local coordinatesdecimals, cdtext = slider.new(self, 'Coord Decimals: '..pMinimap.db.coordinatesdecimals, 0, 3, 'TOPRIGHT', group2, -15, -15)
+	coordinatesdecimals:SetValueStep(1)
 	coordinatesdecimals:SetValue(pMinimap.db.coordinatesdecimals)
 	coordinatesdecimals:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.coordinatesdecimals = value
+		cdtext:SetFormattedText('Coord Decimals: %d', value)
 	end)
 
 	local clock = checkbox.new(self, 22, 'Clock (Disabled)', 'TOPLEFT', coordinates, 'BOTTOMLEFT', 0, -10)
@@ -141,7 +146,7 @@ addon:SetScript('OnShow', function(self)
 		end
 	end)
 
-	local durability = checkbox.new(self, 22, 'Durability', 'LEFT', mail, 'RIGHT', 80, 0)
+	local durability = checkbox.new(self, 22, 'Durability', 'LEFT', mail, 'RIGHT', 110, 0)
 	durability:SetChecked(pMinimap.db.durability)
 	durability:SetScript('OnClick', function()
 		pMinimap.db.durability = not pMinimap.db.durability
@@ -161,11 +166,12 @@ addon:SetScript('OnShow', function(self)
 	group3:SetHeight(60)
 	group3:SetWidth(370)
 
-	local borderoffset = slider.new(self, 'Thickness', 0, 10, 'TOPLEFT', group3, 15, -15)
+	local borderoffset, borderoffsettext = slider.new(self, 'Thickness: '..pMinimap.db.borderoffset, 0, 10, 'TOPLEFT', group3, 15, -15)
 	borderoffset:SetValueStep(1/2)
 	borderoffset:SetValue(pMinimap.db.borderoffset)
 	borderoffset:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.borderoffset = value
+		borderoffsettext:SetFormattedText('Thickness: %.1f', value)
 		Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = -value, bottom = -value, left = -value, right = -value}})
 		Minimap:SetBackdropColor(unpack(pMinimap.db.bordercolors))
 	end)
@@ -191,33 +197,38 @@ addon:SetScript('OnShow', function(self)
 	zonepoint.text:SetText(pMinimap.db.zonepoint)
 	UIDropDownMenu_Initialize(zonepoint, dropZone)
 
-	local zoneoffset = slider.new(self, 'Zone Offset', -25, 25, 'TOPRIGHT', group4, -15, -15)
-	zoneoffset:SetValueStep(1/2)
+	local zoneoffset, zoneoffsettext = slider.new(self, 'Zone Offset: '..pMinimap.db.zoneoffset, -25, 25, 'TOPRIGHT', group4, -15, -15)
+	zoneoffset:SetValueStep(1)
 	zoneoffset:SetValue(pMinimap.db.zoneoffset)
 	zoneoffset:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.zoneoffset = value
+		zoneoffsettext:SetFormattedText('Zone Offset: %d', value)
 		MinimapZoneTextButton:ClearAllPoints()
-		MinimapZoneTextButton:SetPoints(pMinimap.db.zonepoint == 'TOP' and 'BOTTOM' or 'TOP', Minimap, pMinimap.db.zonepoint, 0, value)
+		MinimapZoneTextButton:SetPoint(pMinimap.db.zonepoint == 'TOP' and 'BOTTOM' or 'TOP', Minimap, pMinimap.db.zonepoint, 0, value)
 	end)
 
 	local group5 = group.new(self, 'Fonts', 'TOPLEFT', group4, 'BOTTOMLEFT', 0, -20)
 	group5:SetHeight(110)
 	group5:SetWidth(370)
 
-	local font, fonttext = dropdown.new(self, 'Font', 'TOPLEFT', group5, 10, -4)
+	local font, fonttext, fontcontainer = dropdown.new(self, 'Font', 'TOPLEFT', group5, 10, -4)
+	font:SetWidth(180)
 	font.text = fonttext
 	font.text:SetText(pMinimap.db.font)
 	UIDropDownMenu_Initialize(font, dropFont)
 
 	local fontflag, fontflagtext = dropdown.new(self, 'Font Flag', 'BOTTOMLEFT', group5, 10, 4)
+	fontflag:SetWidth(180)
 	fontflag.text = fontflagtext
 	fontflag.text:SetText(pMinimap.db.fontflag)
 	UIDropDownMenu_Initialize(fontflag, dropFontflag)
 
-	local fontsize = slider.new(self, 'Font Size', 5, 18, 'TOPRIGHT', group5, -15, -15)
+	local fontsize, fontsizetext = slider.new(self, 'Font Size'..pMinimap.db.fontsize, 5, 18, 'TOPRIGHT', group5, -15, -15)
+	fontsize:SetValueStep(1)
 	fontsize:SetValue(pMinimap.db.fontsize)
 	fontsize:SetScript('OnValueChanged', function(self, value)
 		pMinimap.db.fontsize = value
+		fontsizetext:SetFormattedText('Font Size: %d', value)
 		updateStrings()
 	end)
 
