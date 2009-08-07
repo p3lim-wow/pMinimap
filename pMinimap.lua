@@ -229,6 +229,7 @@ function addon:ADDON_LOADED(event, name)
 	SLASH_pMinimap2 = '/pminimap'
 	SlashCmdList[name] = self.Command
 
+	self.unlocked = false
 	self.db = setmetatable(pMinimapDB or {}, {__index = defaults})
 	self:UnregisterEvent(event)
 	self:RegisterEvent('ZONE_CHANGED_NEW_AREA')

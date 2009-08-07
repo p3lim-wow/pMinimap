@@ -88,7 +88,7 @@ addon:SetScript('OnShow', function(self)
 		Minimap:SetScale(value)
 	end)
 
-	local level, leveltext = slider.new(self, 'Framelevel: '..pMinimap.db.level, 1, 15, 'TOPLEFT', scale, 'BOTTOMLEFT', 0, -20)
+	local level, leveltext = slider.new(self, 'Framelevel: '..pMinimap.db.level, 1, 15, 'TOPLEFT', scale, 'BOTTOMLEFT', 0, -30)
 	level:SetValueStep(1)
 	level:SetValue(pMinimap.db.level)
 	level:SetScript('OnValueChanged', function(self, value)
@@ -101,6 +101,18 @@ addon:SetScript('OnShow', function(self)
 	strata.text = stratatext
 	strata.text:SetText(pMinimap.db.strata)
 	UIDropDownMenu_Initialize(strata, dropStrata)
+
+	local lock = checkbox.new(self, 22, 'Locked', 'LEFT', level, 'RIGHT', 45, 0)
+	lock:SetChecked(not pMinimap.unlocked)
+	lock:SetScript('OnClick', function()
+		pMinimap.unlocked = not pMinimap.unlocked
+
+		if(pMinimap.unlocked) then
+			Minimap:SetBackdropColor(0, 1, 0, 0.5)
+		else
+			Minimap:SetBackdropColor(unpack(pMinimap.db.bordercolors))
+		end
+	end)
 
 	local group2 = group.new(self, 'Modules', 'TOPLEFT', group1, 'BOTTOMLEFT', 0, -20)
 	group2:SetHeight(105)
