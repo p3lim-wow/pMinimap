@@ -32,17 +32,14 @@ local defaults = {
 	coordinates = false,
 	coordinatesdecimals = 0,
 }
---[[
-function addon:Clock()
-	if(not IsAddOnLoaded('Blizzard_TimeManager')) then
-		LoadAddOn('Blizzard_TimeManager')
-	end
 
+function addon:Clock()
 	TimeManagerClockButton:GetRegions():Hide()
 	TimeManagerClockButton:ClearAllPoints()
 	TimeManagerClockButton:SetPoint(self.db.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
 	TimeManagerClockButton:SetWidth(40)
 	TimeManagerClockButton:SetHeight(14)
+	TimeManagerClockButton:SetScript('OnShow', nil)
 	TimeManagerClockButton:Show()
 	TimeManagerClockButton:SetScript('OnClick', function(self, button)
 		if(button == 'RightButton') then
@@ -67,7 +64,7 @@ function addon:Clock()
 	self:RegisterEvent('CALENDAR_UPDATE_PENDING_INVITES')
 	self.CALENDAR_UPDATE_PENDING_INVITES()
 end
---]]
+
 function addon:OnClick(button)
 	if(button == 'RightButton') then
 		ToggleBattlefieldMinimap()
@@ -203,12 +200,6 @@ function addon:Style()
 		self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
 		self:UPDATE_INVENTORY_ALERTS()
 	end
---[[
-	if(self.db.clock) then
-		self:Clock()
-	else
-		TimeManagerClockButton:Hide()
-	end --]]
 end
 
 function addon.Command(str)
@@ -221,20 +212,36 @@ function addon.Command(str)
 end
 
 function addon:ADDON_LOADED(event, name)
-	if(name ~= self:GetName()) then return end
+	if(name == self:GetName()) then
+		SharedMedia:Register('font', 'Visitor TT1', [=[Interface\AddOns\pMinimap\media\font.ttf]=])
 
-	SharedMedia:Register('font', 'Visitor TT1', [=[Interface\AddOns\pMinimap\media\font.ttf]=])
+		SLASH_pMinimap1 = '/pmm'
+		SLASH_pMinimap2 = '/pminimap'
+		SlashCmdList[name] = self.Command
 
-	SLASH_pMinimap1 = '/pmm'
-	SLASH_pMinimap2 = '/pminimap'
-	SlashCmdList[name] = self.Command
+		self.unlocked = false
+		self.db = setmetatable(pMinimapDB or {}, {__index = defaults})
+		self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
+		self:RegisterEvent('VARIABLES_LOADED')
 
-	self.unlocked = false
-	self.db = setmetatable(pMinimapDB or {}, {__index = defaults})
-	self:UnregisterEvent(event)
-	self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
+		self:Style()
+	elseif(name == 'Blizzard_TimeManager') then
+--		orig = TimeManagerClockButton:GetScript('OnShow')
+		TimeManagerClockButton:SetScript('OnShow', function(self) self:Hide() end)
+		TimeManagerClockButton:Hide()
 
-	self:Style()
+		if(self.db.clock) then
+			self:Clock()
+		end
+
+		for k, v in next, {InterfaceOptionsDisplayPanelShowClock} do
+			v:SetButtonState('DISABLED', true)
+		end
+	end
+end
+
+function addon:VARIABLES_LOADED(event)
+	SetCVar('showClock', '1')
 end
 
 function addon:CALENDAR_UPDATE_PENDING_INVITES()

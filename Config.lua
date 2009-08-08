@@ -130,6 +130,11 @@ addon:SetScript('OnShow', function(self)
 		else
 			MinimapCoordinates:Hide()
 		end
+
+		if(pMinimap.db.clock) then
+			TimeManagerClockButton:ClearAllPoints()
+			TimeManagerClockButton:SetPoint(pMinimap.db.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
+		end
 	end)
 
 	local coordinatesdecimals, cdtext = slider.new(self, 'Coord Decimals: '..pMinimap.db.coordinatesdecimals, 0, 3, 'TOPRIGHT', group2, -15, -15)
@@ -140,9 +145,28 @@ addon:SetScript('OnShow', function(self)
 		cdtext:SetFormattedText('Coord Decimals: %d', value)
 	end)
 
-	local clock = checkbox.new(self, 22, 'Clock (Disabled)', 'TOPLEFT', coordinates, 'BOTTOMLEFT', 0, -10)
+	local clock = checkbox.new(self, 22, 'Clock', 'TOPLEFT', coordinates, 'BOTTOMLEFT', 0, -10)
 	clock:SetChecked(pMinimap.db.clock)
-	clock:Disable()
+	clock:SetScript('OnClick', function()
+		pMinimap.db.clock = not pMinimap.db.clock
+
+		if(pMinimap.db.clock) then
+			if(not pMinimap:IsEventRegistered('CALENDAR_UPDATE_PENDING_INVITES')) then
+				pMinimap:Clock()
+			else
+				TimeManagerClockButton:ClearAllPoints()
+				TimeManagerClockButton:SetPoint(pMinimap.db.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
+				TimeManagerClockButton:Show()
+			end
+		else
+			TimeManagerClockButton:Hide()
+		end
+
+		if(pMinimap.db.coordinates) then
+			MinimapCoordinates:ClearAllPoints()
+			MinimapCoordinates:SetPoint(pMinimap.db.clock and 'BOTTOMRIGHT' or 'BOTTOM')
+		end
+	end)
 
 	local mail = checkbox.new(self, 22, 'Mail', 'TOPLEFT', clock, 'BOTTOMLEFT', 0, -10)
 	mail:SetChecked(pMinimap.db.mail)
