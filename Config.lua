@@ -69,17 +69,21 @@ local function dropFontflag(orig)
 	end
 end
 
-local addon = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-addon.name = 'pMinimap'
-addon:Hide()
-addon:SetScript('OnShow', function(self)
-	local title, subtitle = LibStub('tekKonfig-Heading').new(self, self.name, 'Here you will be able to change various settings')
+local config = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+config.name = 'pMinimap'
+config:Hide()
+config:SetScript('OnShow', function(self)
+	local title, subtitle = LibStub('tekKonfig-Heading').new(self, self.name, GetAddOnMetadata(self.name, 'Notes'))
 
-	local group1 = group.new(self, 'Minimap', 'TOPLEFT', subtitle, 'BOTTOMLEFT')
-	group1:SetHeight(120)
-	group1:SetWidth(370)
+	self:SetScript('OnShow', nil)
+end)
 
-	local scale, scaletext = slider.new(self, format('Scale: %.2f', pMinimap.db.scale), 0.5, 2.5, 'TOPLEFT', group1, 15, -15)
+local minimapgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+minimapgroup.name = 'Minimap'
+minimapgroup.parent = config.name
+minimapgroup.addonname = config.name
+minimapgroup:SetScript('OnShow', function(self)
+	local scale, scaletext = slider.new(self, format('Scale: %.2f', pMinimap.db.scale), 0.5, 2.5, 'TOPLEFT', self, 15, -15)
 	scale:SetValueStep(0.01)
 	scale:SetValue(pMinimap.db.scale)
 	scale:SetScript('OnValueChanged', function(self, value)
@@ -114,11 +118,15 @@ addon:SetScript('OnShow', function(self)
 		end
 	end)
 
-	local group2 = group.new(self, 'Modules', 'TOPLEFT', group1, 'BOTTOMLEFT', 0, -20)
-	group2:SetHeight(105)
-	group2:SetWidth(370)
+	self:SetScript('OnShow', nil)
+end)
 
-	local coordinates = checkbox.new(self, 22, 'Coordinates', 'TOPLEFT', group2, 10, -10)
+local modulesgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+modulesgroup.name = 'Modules'
+modulesgroup.parent = config.name
+modulesgroup.addonname = config.name
+modulesgroup:SetScript('OnShow', function(self)
+	local coordinates = checkbox.new(self, 22, 'Coordinates', 'TOPLEFT', self, 10, -10)
 	coordinates:SetChecked(pMinimap.db.coordinates)
 	coordinates:SetScript('OnClick', function()
 		pMinimap.db.coordinates = not pMinimap.db.coordinates
@@ -137,7 +145,7 @@ addon:SetScript('OnShow', function(self)
 		end
 	end)
 
-	local coordinatesdecimals, cdtext = slider.new(self, 'Coord Decimals: '..pMinimap.db.coordinatesdecimals, 0, 3, 'TOPRIGHT', group2, -15, -15)
+	local coordinatesdecimals, cdtext = slider.new(self, 'Coord Decimals: '..pMinimap.db.coordinatesdecimals, 0, 3, 'TOPRIGHT', self, -15, -15)
 	coordinatesdecimals:SetValueStep(1)
 	coordinatesdecimals:SetValue(pMinimap.db.coordinatesdecimals)
 	coordinatesdecimals:SetScript('OnValueChanged', function(self, value)
@@ -198,11 +206,15 @@ addon:SetScript('OnShow', function(self)
 		end
 	end)
 
-	local group3 = group.new(self, 'Background', 'TOPLEFT', group2, 'BOTTOMLEFT', 0, -20)
-	group3:SetHeight(60)
-	group3:SetWidth(370)
+	self:SetScript('OnShow', nil)
+end)
 
-	local borderoffset, borderoffsettext = slider.new(self, 'Thickness: '..pMinimap.db.borderoffset, 0, 10, 'TOPLEFT', group3, 15, -15)
+local backgroundgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+backgroundgroup.name = 'Background'
+backgroundgroup.parent = config.name
+backgroundgroup.addonname = config.name
+backgroundgroup:SetScript('OnShow', function(self)
+	local borderoffset, borderoffsettext = slider.new(self, 'Thickness: '..pMinimap.db.borderoffset, 0, 10, 'TOPLEFT', self, 15, -15)
 	borderoffset:SetValueStep(1/2)
 	borderoffset:SetValue(pMinimap.db.borderoffset)
 	borderoffset:SetScript('OnValueChanged', function(self, value)
@@ -212,11 +224,17 @@ addon:SetScript('OnShow', function(self)
 		Minimap:SetBackdropColor(unpack(pMinimap.db.bordercolors))
 	end)
 
-	local group4 = group.new(self, 'Zone', 'TOPLEFT', group3, 'BOTTOMLEFT', 0, -20)
-	group4:SetHeight(95)
-	group4:SetWidth(370)
+	-- todo: color palette
 
-	local zone = checkbox.new(self, 22, 'Zone Toggle', 'TOPLEFT', group4, 10, -10)
+	self:SetScript('OnShow', nil)
+end)
+
+local zonegroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+zonegroup.name = 'Zone'
+zonegroup.parent = config.name
+zonegroup.addonname = config.name
+zonegroup:SetScript('OnShow', function(self)
+	local zone = checkbox.new(self, 22, 'Zone Toggle', 'TOPLEFT', self, 10, -10)
 	zone:SetChecked(pMinimap.db.zone)
 	zone:SetScript('OnClick', function()
 		pMinimap.db.zone = not pMinimap.db.zone
@@ -233,7 +251,7 @@ addon:SetScript('OnShow', function(self)
 	zonepoint.text:SetText(pMinimap.db.zonepoint)
 	UIDropDownMenu_Initialize(zonepoint, dropZone)
 
-	local zoneoffset, zoneoffsettext = slider.new(self, 'Zone Offset: '..pMinimap.db.zoneoffset, -25, 25, 'TOPRIGHT', group4, -15, -15)
+	local zoneoffset, zoneoffsettext = slider.new(self, 'Zone Offset: '..pMinimap.db.zoneoffset, -25, 25, 'TOPRIGHT', self, -15, -15)
 	zoneoffset:SetValueStep(1)
 	zoneoffset:SetValue(pMinimap.db.zoneoffset)
 	zoneoffset:SetScript('OnValueChanged', function(self, value)
@@ -243,23 +261,27 @@ addon:SetScript('OnShow', function(self)
 		MinimapZoneTextButton:SetPoint(pMinimap.db.zonepoint == 'TOP' and 'BOTTOM' or 'TOP', Minimap, pMinimap.db.zonepoint, 0, value)
 	end)
 
-	local group5 = group.new(self, 'Fonts', 'TOPLEFT', group4, 'BOTTOMLEFT', 0, -20)
-	group5:SetHeight(110)
-	group5:SetWidth(370)
+	self:SetScript('OnShow', nil)
+end)
 
-	local font, fonttext, fontcontainer = dropdown.new(self, 'Font', 'TOPLEFT', group5, 10, -4)
+local fontsgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+fontsgroup.name = 'Fonts'
+fontsgroup.parent = config.name
+fontsgroup.addonname = config.name
+fontsgroup:SetScript('OnShow', function(self)
+	local font, fonttext, fontcontainer = dropdown.new(self, 'Font', 'TOPLEFT', self, 10, -4)
 	font:SetWidth(180)
 	font.text = fonttext
 	font.text:SetText(pMinimap.db.font)
 	UIDropDownMenu_Initialize(font, dropFont)
 
-	local fontflag, fontflagtext = dropdown.new(self, 'Font Flag', 'BOTTOMLEFT', group5, 10, 4)
+	local fontflag, fontflagtext = dropdown.new(self, 'Font Flag', 'BOTTOMLEFT', self, 10, 4)
 	fontflag:SetWidth(180)
 	fontflag.text = fontflagtext
 	fontflag.text:SetText(pMinimap.db.fontflag)
 	UIDropDownMenu_Initialize(fontflag, dropFontflag)
 
-	local fontsize, fontsizetext = slider.new(self, 'Font Size'..pMinimap.db.fontsize, 5, 18, 'TOPRIGHT', group5, -15, -15)
+	local fontsize, fontsizetext = slider.new(self, 'Font Size'..pMinimap.db.fontsize, 5, 18, 'TOPRIGHT', self, -15, -15)
 	fontsize:SetValueStep(1)
 	fontsize:SetValue(pMinimap.db.fontsize)
 	fontsize:SetScript('OnValueChanged', function(self, value)
@@ -271,4 +293,9 @@ addon:SetScript('OnShow', function(self)
 	self:SetScript('OnShow', nil)
 end)
 
-InterfaceOptions_AddCategory(addon)
+InterfaceOptions_AddCategory(config)
+InterfaceOptions_AddCategory(minimapgroup)
+InterfaceOptions_AddCategory(modulesgroup)
+InterfaceOptions_AddCategory(backgroundgroup)
+InterfaceOptions_AddCategory(zonegroup)
+InterfaceOptions_AddCategory(fontsgroup)
