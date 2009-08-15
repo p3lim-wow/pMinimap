@@ -3,7 +3,7 @@
 ## Version: 30200.2-Beta
 ## Title: |cffff6000p|rMinimap
 ## Notes: Yet another square minimap addon
-## SavedVariablesPerCharacter: pMinimapDB
+## SavedVariables: pMinimapDB
 ## OptionalDeps: LibSharedMedia-3.0, SharedMedia
 
 libs\LibStub.lua
