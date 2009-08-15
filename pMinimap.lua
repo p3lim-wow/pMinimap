@@ -226,7 +226,6 @@ function addon:ADDON_LOADED(event, name)
 
 		self:Style()
 	elseif(name == 'Blizzard_TimeManager') then
---		orig = TimeManagerClockButton:GetScript('OnShow')
 		TimeManagerClockButton:SetScript('OnShow', function(self) self:Hide() end)
 		TimeManagerClockButton:Hide()
 
