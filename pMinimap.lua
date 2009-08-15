@@ -77,7 +77,7 @@ function addon:OnUpdate(elapsed)
 	if(self.total <= 0) then
 		local x, y = GetPlayerMapPosition('player')
 		if(x ~= 0 and y ~= 0) then
-			MinimapCoordinatesText:SetFormattedText('%.' .. addon.db.coordinatesdecimals .. 'f,%.' .. addon.db.coordinatesdecimals .. 'f', x * 100, y * 100)
+			MinimapCoordinatesText:SetFormattedText('%.' .. pMinimapDB.coordinatesdecimals .. 'f,%.' .. pMinimapDB.coordinatesdecimals .. 'f', x * 100, y * 100)
 		else
 			MinimapCoordinatesText:SetText()
 		end
