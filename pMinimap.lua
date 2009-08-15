@@ -36,7 +36,7 @@ local defaults = {
 function addon:Clock()
 	TimeManagerClockButton:GetRegions():Hide()
 	TimeManagerClockButton:ClearAllPoints()
-	TimeManagerClockButton:SetPoint(self.db.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
+	TimeManagerClockButton:SetPoint(pMinimapDB.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
 	TimeManagerClockButton:SetWidth(40)
 	TimeManagerClockButton:SetHeight(14)
 	TimeManagerClockButton:SetScript('OnShow', nil)
@@ -55,7 +55,7 @@ function addon:Clock()
 	end)
 
 	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
-	TimeManagerClockTicker:SetFont(SharedMedia:Fetch('font', self.db.font), self.db.fontsize, self.db.fontflag)
+	TimeManagerClockTicker:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	TimeManagerClockTicker:SetShadowOffset(0, 0)
 
 	TimeManagerAlarmFiredTexture.Show = function() TimeManagerClockTicker:SetTextColor(1, 0, 0) end
@@ -127,11 +127,11 @@ function addon:Style()
 
 	MiniMapMailText = MiniMapMailFrame:CreateFontString(nil, 'OVERLAY')
 	MiniMapMailText:SetPoint('BOTTOM', 0, 2)
-	MiniMapMailText:SetFont(SharedMedia:Fetch('font', self.db.font), self.db.fontsize, self.db.fontflag)
+	MiniMapMailText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	MiniMapMailText:SetTextColor(1, 1, 1)
 	MiniMapMailText:SetText('New Mail!')
 
-	if(self.db.mail) then
+	if(pMinimapDB.mail) then
 		MiniMapMailIcon:Hide()
 	else
 		MiniMapMailText:Hide()
@@ -139,7 +139,7 @@ function addon:Style()
 
 	-- Coordinates
 	MinimapCoordinates = CreateFrame('Button', nil, Minimap)
-	MinimapCoordinates:SetPoint(self.db.clock and 'BOTTOMRIGHT' or 'BOTTOM')
+	MinimapCoordinates:SetPoint(pMinimapDB.clock and 'BOTTOMRIGHT' or 'BOTTOM')
 	MinimapCoordinates:SetWidth(40)
 	MinimapCoordinates:SetHeight(14)
 	MinimapCoordinates:RegisterForClicks('AnyUp')
@@ -149,24 +149,24 @@ function addon:Style()
 
 	MinimapCoordinatesText = MinimapCoordinates:CreateFontString(nil, 'OVERLAY')
 	MinimapCoordinatesText:SetPoint('BOTTOMRIGHT', MinimapCoordinates)
-	MinimapCoordinatesText:SetFont(SharedMedia:Fetch('font', self.db.font), self.db.fontsize, self.db.fontflag)
+	MinimapCoordinatesText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	MinimapCoordinatesText:SetTextColor(1, 1, 1)
 
-	if(not self.db.coordinates) then
+	if(not pMinimapDB.coordinates) then
 		MinimapCoordinates:Hide()
 	end
 
 	-- Zone text
 	MinimapZoneText:SetAllPoints(MinimapZoneTextButton)
-	MinimapZoneText:SetFont(SharedMedia:Fetch('font', self.db.font), self.db.fontsize, self.db.fontflag)
+	MinimapZoneText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
 	MinimapZoneText:SetShadowOffset(0, 0)
 
 	MinimapZoneTextButton:ClearAllPoints()
 	MinimapZoneTextButton:SetParent(Minimap)
-	MinimapZoneTextButton:SetPoint(self.db.zonepoint == 'BOTTOM' and 'TOP' or 'BOTTOM', Minimap, self.db.zonepoint, 0, self.db.zoneoffset)
+	MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'TOP' or 'BOTTOM', Minimap, pMinimapDB.zonepoint, 0, pMinimapDB.zoneoffset)
 	MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
 
-	if(not self.db.zone) then
+	if(not pMinimapDB.zone) then
 		MinimapZoneTextButton:Hide()
 	end
 
@@ -180,12 +180,12 @@ function addon:Style()
 	GameTimeFrame:Hide()
 
 	-- Inject settings
-	Minimap:SetScale(self.db.scale)
-	Minimap:SetFrameLevel(self.db.level)
-	Minimap:SetFrameStrata(self.db.strata)
+	Minimap:SetScale(pMinimapDB.scale)
+	Minimap:SetFrameLevel(pMinimapDB.level)
+	Minimap:SetFrameStrata(pMinimapDB.strata)
 	Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
-	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - self.db.borderoffset, bottom = - self.db.borderoffset, left = - self.db.borderoffset, right = - self.db.borderoffset}})
-	Minimap:SetBackdropColor(unpack(self.db.bordercolors))
+	Minimap:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {top = - pMinimapDB.borderoffset, bottom = - pMinimapDB.borderoffset, left = - pMinimapDB.borderoffset, right = - pMinimapDB.borderoffset}})
+	Minimap:SetBackdropColor(unpack(pMinimapDB.bordercolors))
 
 	Minimap:RegisterForDrag('LeftButton')
 	Minimap:SetMovable(true)
@@ -194,7 +194,7 @@ function addon:Style()
 	MinimapCluster:EnableMouse(false)
 
 	-- Modules
-	if(self.db.durability) then
+	if(pMinimapDB.durability) then
 		DurabilityFrame:SetAlpha(0)
 
 		self:RegisterEvent('UPDATE_INVENTORY_ALERTS')
@@ -220,7 +220,7 @@ function addon:ADDON_LOADED(event, name)
 		SlashCmdList[name] = self.Command
 
 		self.unlocked = false
-		self.db = setmetatable(pMinimapDB or {}, {__index = defaults})
+		pMinimapDB = setmetatable(pMinimapDB or {}, {__index = defaults})
 		self:RegisterEvent('ZONE_CHANGED_NEW_AREA')
 		self:RegisterEvent('VARIABLES_LOADED')
 
@@ -229,7 +229,7 @@ function addon:ADDON_LOADED(event, name)
 		TimeManagerClockButton:SetScript('OnShow', function(self) self:Hide() end)
 		TimeManagerClockButton:Hide()
 
-		if(self.db.clock) then
+		if(pMinimapDB.clock) then
 			self:Clock()
 		end
 
@@ -262,7 +262,7 @@ function addon:UPDATE_INVENTORY_ALERTS()
 	if(color) then
 		Minimap:SetBackdropColor(color.r, color.g, color.b)
 	else
-		Minimap:SetBackdropColor(unpack(self.db.bordercolors))
+		Minimap:SetBackdropColor(unpack(pMinimapDB.bordercolors))
 	end
 end
 
