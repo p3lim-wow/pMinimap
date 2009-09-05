@@ -69,20 +69,17 @@ local function dropFontflag(orig)
 	end
 end
 
-local config = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-config.name = 'pMinimap'
-config:Hide()
-config:SetScript('OnShow', function(self)
-	local title, subtitle = LibStub('tekKonfig-Heading').new(self, self.name, GetAddOnMetadata(self.name, 'Notes'))
+local function config(self)
+	local header = LibStub('tekKonfig-Heading').new(self, self.name)
 
-	self:SetScript('OnShow', nil)
-end)
+	local info = self:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightLeft')
+	info:SetPoint('TOPLEFT', header, 0, 100)
+	info:SetWidth(300)
+	info:SetHeight(400)
+	info:SetText('Use the colums in the menu to the left to access the options.\n\nThis is most likely temporary, and will be cleaned up later.\n\n\nPlease visit the addon page over at\n|cff8080ffhttp://wowinterface.com/|r for more information and to ask for questions/report bugs.\n\nEnjoy!')
+end
 
-local minimapgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-minimapgroup.name = 'Minimap'
-minimapgroup.parent = config.name
-minimapgroup.addonname = config.name
-minimapgroup:SetScript('OnShow', function(self)
+local function minimap(self)
 	local scale, scaletext = slider.new(self, format('Scale: %.2f', pMinimapDB.scale), 0.5, 2.5, 'TOPLEFT', self, 15, -15)
 	scale:SetValueStep(0.01)
 	scale:SetValue(pMinimapDB.scale)
@@ -117,15 +114,9 @@ minimapgroup:SetScript('OnShow', function(self)
 			Minimap:SetBackdropColor(unpack(pMinimapDB.bordercolors))
 		end
 	end)
+end
 
-	self:SetScript('OnShow', nil)
-end)
-
-local modulesgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-modulesgroup.name = 'Modules'
-modulesgroup.parent = config.name
-modulesgroup.addonname = config.name
-modulesgroup:SetScript('OnShow', function(self)
+local function modules(self)
 	local coordinates = checkbox.new(self, 22, 'Coordinates', 'TOPLEFT', self, 10, -10)
 	coordinates:SetChecked(pMinimapDB.coordinates)
 	coordinates:SetScript('OnClick', function()
@@ -205,15 +196,9 @@ modulesgroup:SetScript('OnShow', function(self)
 			Minimap:SetBackdropColor(unpack(pMinimapDB.bordercolors))
 		end
 	end)
+end
 
-	self:SetScript('OnShow', nil)
-end)
-
-local backgroundgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-backgroundgroup.name = 'Background'
-backgroundgroup.parent = config.name
-backgroundgroup.addonname = config.name
-backgroundgroup:SetScript('OnShow', function(self)
+local function background(self)
 	local borderoffset, borderoffsettext = slider.new(self, 'Thickness: '..pMinimapDB.borderoffset, 0, 10, 'TOPLEFT', self, 15, -15)
 	borderoffset:SetValueStep(1/2)
 	borderoffset:SetValue(pMinimapDB.borderoffset)
@@ -225,15 +210,9 @@ backgroundgroup:SetScript('OnShow', function(self)
 	end)
 
 	-- todo: color palette
+end
 
-	self:SetScript('OnShow', nil)
-end)
-
-local zonegroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-zonegroup.name = 'Zone'
-zonegroup.parent = config.name
-zonegroup.addonname = config.name
-zonegroup:SetScript('OnShow', function(self)
+local function zone(self)
 	local zone = checkbox.new(self, 22, 'Zone Toggle', 'TOPLEFT', self, 10, -10)
 	zone:SetChecked(pMinimapDB.zone)
 	zone:SetScript('OnClick', function()
@@ -260,22 +239,16 @@ zonegroup:SetScript('OnShow', function(self)
 		MinimapZoneTextButton:ClearAllPoints()
 		MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'TOP' and 'BOTTOM' or 'TOP', Minimap, pMinimapDB.zonepoint, 0, value)
 	end)
+end
 
-	self:SetScript('OnShow', nil)
-end)
-
-local fontsgroup = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
-fontsgroup.name = 'Fonts'
-fontsgroup.parent = config.name
-fontsgroup.addonname = config.name
-fontsgroup:SetScript('OnShow', function(self)
+local function fonts(self)
 	local font, fonttext, fontcontainer = dropdown.new(self, 'Font', 'TOPLEFT', self, 10, -4)
 	font:SetWidth(180)
 	font.text = fonttext
 	font.text:SetText(pMinimapDB.font)
 	UIDropDownMenu_Initialize(font, dropFont)
 
-	local fontflag, fontflagtext = dropdown.new(self, 'Font Flag', 'BOTTOMLEFT', self, 10, 4)
+	local fontflag, fontflagtext = dropdown.new(self, 'Font Flag', 'TOPLEFT', font, 'BOTTOMLEFT', 15, 0)
 	fontflag:SetWidth(180)
 	fontflag.text = fontflagtext
 	fontflag.text:SetText(pMinimapDB.fontflag)
@@ -289,13 +262,23 @@ fontsgroup:SetScript('OnShow', function(self)
 		fontsizetext:SetFormattedText('Font Size: %d', value)
 		updateStrings()
 	end)
+end
 
-	self:SetScript('OnShow', nil)
-end)
+local function spawn(name, func, parent)
+	local group = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
+	group.name = name
+	group.parent = parent and 'pMinimap'
+	group.addonname = parent and 'pMinimap'
+	group:SetScript('OnShow', func)
+	group:HookScript('OnShow', function(self) self:SetScript('OnShow', nil) end)
 
-InterfaceOptions_AddCategory(config)
-InterfaceOptions_AddCategory(minimapgroup)
-InterfaceOptions_AddCategory(modulesgroup)
-InterfaceOptions_AddCategory(backgroundgroup)
-InterfaceOptions_AddCategory(zonegroup)
-InterfaceOptions_AddCategory(fontsgroup)
+	InterfaceOptions_AddCategory(group)
+	return group
+end
+
+spawn('pMinimap', config):Hide()
+spawn('Minimap', minimap, true)
+spawn('Modules', modules, true)
+spawn('Background', background, true)
+spawn('Zone', zone, true)
+spawn('Fonts', fonts, true)
