@@ -3,9 +3,15 @@
 local group, slider, dropdown, checkbox = LibStub('tekKonfig-Group'), LibStub('tekKonfig-Slider'), LibStub('tekKonfig-Dropdown'), LibStub('tekKonfig-Checkbox')
 
 local function updateStrings()
-	MiniMapMailText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
-	MinimapZoneText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
-	MinimapCoordinatesText:SetFont(SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag)
+	local font, size, flag = SharedMedia:Fetch('font', pMinimapDB.font), pMinimapDB.fontsize, pMinimapDB.fontflag
+
+	MiniMapMailText:SetFont(font, size, flag)
+	MinimapZoneText:SetFont(font, size, flag)
+	MinimapCoordinatesText:SetFont(font, size, flag)
+
+	if(pMinimapDB.clock) then
+		TimeManagerClockTicker:SetFont(font, size, flag)
+	end
 end
 
 local function dropStrata(orig)
@@ -159,6 +165,7 @@ local function modules(self)
 			end
 		else
 			TimeManagerClockButton:Hide()
+			TimeManagerClockButton:SetScript('OnShow', pMinimap.ClockHook)
 		end
 
 		if(pMinimapDB.coordinates) then

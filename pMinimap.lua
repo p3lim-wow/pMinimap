@@ -33,6 +33,10 @@ local defaults = {
 	coordinatesdecimals = 0,
 }
 
+function addon:ClockHook(self)
+	self:Hide()
+end
+
 function addon:Clock()
 	TimeManagerClockButton:GetRegions():Hide()
 	TimeManagerClockButton:ClearAllPoints()
@@ -226,7 +230,7 @@ function addon:ADDON_LOADED(event, name)
 
 		self:Style()
 	elseif(name == 'Blizzard_TimeManager') then
-		TimeManagerClockButton:SetScript('OnShow', function(self) self:Hide() end)
+		TimeManagerClockButton:SetScript('OnShow', self.ClockHook)
 		TimeManagerClockButton:Hide()
 
 		if(pMinimapDB.clock) then
