@@ -34,7 +34,13 @@ local function dropZone(orig)
 	info.func = function(self)
 		pMinimapDB.zonepoint = self.value
 		MinimapZoneTextButton:ClearAllPoints()
-		MinimapZoneTextButton:SetPoint(self.value == 'TOP' and 'BOTTOM' or 'TOP', Minimap, self.value, 0, pMinimapDB.zoneoffset)
+		if(pMinimapDB.zonefixed) then
+			MinimapZoneTextButton:SetPoint(self.value == 'BOTTOM' and 'BOTTOMLEFT' or 'TOPLEFT', Minimap, 0, pMinimapDB.zoneoffset)
+			MinimapZoneTextButton:SetPoint(self.value == 'BOTTOM' and 'BOTTOMRIGHT' or 'TOPRIGHT', Minimap, 0, pMinimapDB.zoneoffset)
+		else
+			MinimapZoneTextButton:SetPoint(self.value, Minimap, 0, pMinimapDB.zoneoffset)
+			MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
+		end
 		orig.text:SetText(self.value)
 	end
 
@@ -237,14 +243,38 @@ local function zone(self)
 	zonepoint.text:SetText(pMinimapDB.zonepoint)
 	UIDropDownMenu_Initialize(zonepoint, dropZone)
 
-	local zoneoffset, zoneoffsettext = slider.new(self, 'Zone Offset: '..pMinimapDB.zoneoffset, -25, 25, 'TOPRIGHT', self, -15, -15)
+	local zoneoffset, zoneoffsettext = slider.new(self, 'Zone Offset: '..pMinimapDB.zoneoffset, -45, 45, 'TOPRIGHT', self, -15, -15)
 	zoneoffset:SetValueStep(1)
 	zoneoffset:SetValue(pMinimapDB.zoneoffset)
 	zoneoffset:SetScript('OnValueChanged', function(self, value)
 		pMinimapDB.zoneoffset = value
 		zoneoffsettext:SetFormattedText('Zone Offset: %d', value)
+
 		MinimapZoneTextButton:ClearAllPoints()
-		MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'TOP' and 'BOTTOM' or 'TOP', Minimap, pMinimapDB.zonepoint, 0, value)
+		if(pMinimapDB.zonefixed) then
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMLEFT' or 'TOPLEFT', Minimap, 0, value)
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMRIGHT' or 'TOPRIGHT', Minimap, 0, value)
+		else
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint, Minimap, 0, value)
+			MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
+		end
+	end)
+
+	local zonefixed = checkbox.new(self, 22, 'Zone Fixed Width', 'TOPLEFT', zonepoint, 'BOTTOMLEFT', 10, -10)
+	zonefixed:SetChecked(pMinimapDB.zonefixed)
+	zonefixed:SetScript('OnClick', function()
+		pMinimapDB.zonefixed = not pMinimapDB.zonefixed
+
+		MinimapZoneTextButton:ClearAllPoints()
+		if(pMinimapDB.zonefixed) then
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMLEFT' or 'TOPLEFT', Minimap, 0, pMinimapDB.zoneoffset)
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMRIGHT' or 'TOPRIGHT', Minimap, 0, pMinimapDB.zoneoffset)
+		else
+			MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint, Minimap, 0, pMinimapDB.zoneoffset)
+			MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
+		end
+
+		zoneoffset:GetScript('OnValueChanged')(self, pMinimapDB.zoneoffset)
 	end)
 end
 

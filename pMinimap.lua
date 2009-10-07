@@ -20,7 +20,8 @@ local defaults = {
 	fontflag = 'OUTLINE',
 	zone = false,
 	zonepoint = 'TOP',
-	zoneoffset = 8,
+	zoneoffset = 16,
+	zonefixed = false,
 	scale = 0.9,
 	level = 2,
 	strata = 'BACKGROUND',
@@ -167,11 +168,17 @@ function addon:Style()
 
 	MinimapZoneTextButton:ClearAllPoints()
 	MinimapZoneTextButton:SetParent(Minimap)
-	MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'TOP' or 'BOTTOM', Minimap, pMinimapDB.zonepoint, 0, pMinimapDB.zoneoffset)
-	MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
 
 	if(not pMinimapDB.zone) then
 		MinimapZoneTextButton:Hide()
+	end
+
+	if(pMinimapDB.zonefixed) then
+		MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMLEFT' or 'TOPLEFT', Minimap, 0, pMinimapDB.zoneoffset)
+		MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint == 'BOTTOM' and 'BOTTOMRIGHT' or 'TOPRIGHT', Minimap, 0, pMinimapDB.zoneoffset)
+	else
+		MinimapZoneTextButton:SetPoint(pMinimapDB.zonepoint, Minimap, 0, pMinimapDB.zoneoffset)
+		MinimapZoneTextButton:SetWidth(Minimap:GetWidth() * 1.5)
 	end
 
 	-- Misc textures/icons/texts
