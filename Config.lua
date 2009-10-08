@@ -167,6 +167,7 @@ local function modules(self)
 			else
 				TimeManagerClockButton:ClearAllPoints()
 				TimeManagerClockButton:SetPoint(pMinimapDB.coordinates and 'BOTTOMLEFT' or 'BOTTOM', Minimap)
+				TimeManagerClockButton:SetScript('OnShow', nil)
 				TimeManagerClockButton:Show()
 			end
 		else

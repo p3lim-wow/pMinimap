@@ -34,7 +34,7 @@ local defaults = {
 	coordinatesdecimals = 0,
 }
 
-function addon:ClockHook(self)
+function addon:ClockHook()
 	self:Hide()
 end
 
