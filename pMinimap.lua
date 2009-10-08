@@ -252,6 +252,12 @@ end
 
 function addon:VARIABLES_LOADED(event)
 	SetCVar('showClock', '1')
+
+	if(not IsAddOnLoaded('Blizzard_TimeManager')) then
+		LoadAddOn('Blizzard_TimeManager')
+	elseif(not self:IsEventRegistered('CALENDAR_UPDATE_PENDING_INVITES')) then
+		self:ADDON_LOADED(event, 'Blizzard_TimeManager')
+	end
 end
 
 function addon:CALENDAR_UPDATE_PENDING_INVITES()
