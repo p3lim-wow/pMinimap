@@ -184,9 +184,7 @@ function addon:Style()
 	-- Misc textures/icons/texts
 	MinimapBorder:SetTexture(nil)
 	MinimapBorderTop:Hide()
-	MinimapToggleButton:Hide()
 	MinimapNorthTag:SetAlpha(0)
-	MiniMapMeetingStoneFrame:SetAlpha(0)
 	MiniMapWorldMapButton:Hide()
 	GameTimeFrame:Hide()
 
