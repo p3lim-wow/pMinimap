@@ -185,6 +185,7 @@ function addon:Style()
 	MinimapBorder:SetTexture(nil)
 	MinimapBorderTop:Hide()
 	MinimapNorthTag:SetAlpha(0)
+	MiniMapInstanceDifficulty:SetAlpha(0)
 	MiniMapWorldMapButton:Hide()
 	GameTimeFrame:Hide()
 
