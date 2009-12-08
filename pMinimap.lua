@@ -116,6 +116,12 @@ function addon:Style()
 	MiniMapTrackingIconOverlay:SetTexture(nil)
 	MiniMapTrackingIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935)
 
+	-- LFG
+	MiniMapLFGFrame:ClearAllPoints()
+	MiniMapLFGFrame:SetParent(Minimap)
+	MiniMapLFGFrame:SetPoint('BOTTOMLEFT', -2, -2)
+	MiniMapLFGFrameBorder:Hide()
+
 	-- Battlefield icon
 	MiniMapBattlefieldFrame:ClearAllPoints()
 	MiniMapBattlefieldFrame:SetParent(Minimap)
