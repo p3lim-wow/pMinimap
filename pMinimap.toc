@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Author: p3lim
-## Version: 30300.7-Release
+## Version: 30300.8-Release
 ## Title: |cffff6000p|rMinimap
 ## Notes: Yet another square minimap addon
 ## SavedVariables: pMinimapDB
