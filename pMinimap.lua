@@ -119,7 +119,8 @@ function addon:Style()
 	-- LFG
 	MiniMapLFGFrame:ClearAllPoints()
 	MiniMapLFGFrame:SetParent(Minimap)
-	MiniMapLFGFrame:SetPoint('BOTTOMLEFT', -2, -2)
+	MiniMapLFGFrame:SetPoint('TOPRIGHT', 0, 2)
+	MiniMapLFGFrame:SetHighlightTexture(nil)
 	MiniMapLFGFrameBorder:Hide()
 
 	-- Battlefield icon
