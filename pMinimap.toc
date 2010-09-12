@@ -1,7 +1,7 @@
-## Interface: 30300
+## Interface: 40000
 ## Author: p3lim
-## Version: 30300.8-Release
-## Title: |cffff6000p|rMinimap
+## Version: Alpha
+## Title: pMinimap
 ## Notes: Yet another square minimap addon
 ## SavedVariables: pMinimapDB
 ## OptionalDeps: LibSharedMedia-3.0, SharedMedia
@@ -12,6 +12,8 @@ libs\LibSharedMedia-3.0.lua
 
 pMinimap.lua
 
-libs\tekKonfig\tekKonfig.xml
-
-Config.lua
+config\module.checkbox.lua
+config\module.dropdown.lua
+config\module.palette.lua
+config\module.slider.lua
+config\configuration.lua
