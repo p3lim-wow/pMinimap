@@ -96,15 +96,7 @@ function pMinimap:ADDON_LOADED(addon)
 
 	pMinimapDB = pMinimapDB or DEFAULTS
 
-	self:RegisterEvent('VARIABLES_LOADED')
 	self:Init()
-
-	-- Don't let Blizzard fuck up things for me
-	InterfaceOptionsDisplayPanelShowClock:SetButtonState('DISABLED', true)
-end
-
-function pMinimap:VARIABLES_LOADED()
-	SetCVar('showClock', '1')
 end
 
 -- http://wowwiki.com/GetMinimapShape
