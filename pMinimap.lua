@@ -29,7 +29,10 @@ local DEFAULTS = {
 	},
 }
 
-function pMinimap:Init()
+function pMinimap:ADDON_LOADED(addon)
+	if(addon ~= 'pMinimap') then return end
+	pMinimapDB = pMinimapDB or DEFAULTS
+
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()
 	Minimap:EnableMouseWheel()
@@ -83,20 +86,12 @@ function pMinimap:Init()
 	ns.UpdateObjects()
 	ns.UpdateCore()
 	ns.UpdateFont()
-end
-
-function pMinimap:ADDON_LOADED(addon)
-	if(addon ~= 'pMinimap') then return end
 
 	SLASH_pMinimap1 = '/pmm'
 	SLASH_pMinimap2 = '/pminimap'
 	SlashCmdList.pMinimap = function()
 		InterfaceOptionsFrame_OpenToCategory('pMinimap')
 	end
-
-	pMinimapDB = pMinimapDB or DEFAULTS
-
-	self:Init()
 end
 
 -- http://wowwiki.com/GetMinimapShape
