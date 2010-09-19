@@ -1,6 +1,6 @@
 local _, ns = ...
 
-pMinimap = CreateFrame('Frame', 'pMinimap', Minimap)
+local pMinimap = CreateFrame('Frame')
 pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
 pMinimap:RegisterEvent('ADDON_LOADED')
 
