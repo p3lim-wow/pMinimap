@@ -2,7 +2,7 @@ local _, ns = ...
 
 local pMinimap = CreateFrame('Frame')
 pMinimap:SetScript('OnEvent', function(self, event, ...) self[event](self, ...) end)
-pMinimap:RegisterEvent('ADDON_LOADED')
+pMinimap:RegisterEvent('PLAYER_LOGIN')
 
 local DEFAULTS = {
 	minimap = {
@@ -29,8 +29,7 @@ local DEFAULTS = {
 	},
 }
 
-function pMinimap:ADDON_LOADED(addon)
-	if(addon ~= 'pMinimap') then return end
+function pMinimap:PLAYER_LOGIN()
 	pMinimapDB = pMinimapDB or DEFAULTS
 
 	MinimapZoomIn:Hide()
