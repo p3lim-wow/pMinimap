@@ -74,10 +74,7 @@ function pMinimap:ADDON_LOADED(addon)
 	MinimapZoneTextButton:SetParent(Minimap)
 	MinimapZoneText:SetShadowOffset(0, 0)
 
-	if(not IsAddOnLoaded('Blizzard_TimeManager')) then
-		LoadAddOn('Blizzard_TimeManager')
-	end
-
+	TimeManager_LoadUI()
 	TimeManagerClockButton:GetRegions():Hide()
 	TimeManagerClockButton:SetSize(40, 14)
 	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
