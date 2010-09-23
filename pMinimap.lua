@@ -31,7 +31,7 @@ local DEFAULTS = {
 }
 
 function pMinimap:PLAYER_LOGIN()
-	pMinimapDB = pMinimapDB or DEFAULTS
+	pMinimapDB = setmetatable(pMinimapDB or {}, {__index = DEFAULTS})
 
 	MinimapZoomIn:Hide()
 	MinimapZoomOut:Hide()

@@ -3,7 +3,7 @@
 ## Version: Alpha
 ## Title: pMinimap
 ## Notes: Yet another square minimap addon
-## SavedVariables: pMinimapDB
+## SavedVariablesPerChar: pMinimapDB
 ## OptionalDeps: LibSharedMedia-3.0, SharedMedia
 
 libs\LibStub.lua
