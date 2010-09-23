@@ -46,6 +46,16 @@ function ns.UpdateFont()
 	TimeManagerClockTicker:SetFont(font, size, flag)
 end
 
+function ns.UpdatePosition(save)
+	if(save) then
+		local point, _, _, x, y = Minimap:GetPoint()
+		pMinimapDB.minimap.position = string.format('%s\031%d\031%d', point, x, y)
+	else
+		local point, x, y = string.split('\031', pMinimapDB.minimap.position)
+		Minimap:ClearAllPoints()
+		Minimap:SetPoint(point, UIParent, point, x, y)
+	end
+end
 
 local function AddConfig(name, func)
 	local group = CreateFrame('Frame', nil, InterfaceOptionsFramePanelContainer)
@@ -66,6 +76,13 @@ AddConfig('pMinimap', function(self)
 	scale:HookScript('OnValueChanged', function(frame, value)
 		pMinimapDB.minimap.scale = value
 		ns.UpdateCore()
+	end)
+
+	local unlock = ns.checkbox(self, 'Unlocked', 'TOPLEFT', 30, -80)
+	unlock:SetChecked(ns.UNLOCKED)
+	unlock:SetScript('OnClick', function()
+		ns.UNLOCKED = not ns.UNLOCKED
+		unlock:SetChecked(ns.UNLOCKED)
 	end)
 
 	local level = ns.slider(self, 'Frame Level', '%d', pMinimapDB.minimap.level, 0, 10, 1, 'TOPRIGHT', -30, -30)

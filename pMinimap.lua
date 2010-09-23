@@ -11,6 +11,7 @@ local DEFAULTS = {
 		strata = 'BACKGROUND',
 		borderSize = 1,
 		borderColors = {0, 0, 0, 1},
+		position = 'TOPRIGHT\031-15\031-15',
 	},
 	objects = {
 		Zone = {point = 'TOP', shown = false},
@@ -43,7 +44,20 @@ function pMinimap:PLAYER_LOGIN()
 		end
 	end)
 
+	Minimap:SetMovable(true)
+	Minimap:SetClampedToScreen()
+	Minimap:RegisterForDrag('LeftButton')
 	Minimap:SetMaskTexture([=[Interface\ChatFrame\ChatFrameBackground]=])
+	Minimap:SetScript('OnDragStart', function(self)
+		if(not ns.UNLOCKED) then return end
+		self:StartMoving()
+	end)
+	Minimap:SetScript('OnDragStop', function(self)
+		if(not ns.UNLOCKED) then return end
+		self:StopMovingOrSizing()
+		ns.UpdatePosition(true)
+	end)
+
 	MinimapCluster:EnableMouse(false)
 	MinimapBorder:SetTexture(nil)
 	MinimapBorderTop:Hide()
@@ -79,6 +93,8 @@ function pMinimap:PLAYER_LOGIN()
 	TimeManagerClockTicker:SetPoint('CENTER', TimeManagerClockButton)
 	TimeManagerClockTicker:SetShadowOffset(0, 0)
 
+	ns.UNLOCKED = false
+	ns.UpdatePosition()
 	ns.UpdateObjects()
 	ns.UpdateCore()
 	ns.UpdateFont()
