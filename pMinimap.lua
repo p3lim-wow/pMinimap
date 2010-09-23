@@ -81,6 +81,7 @@ function pMinimap:PLAYER_LOGIN()
 	MiniMapBattlefieldBorder:SetTexture(nil)
 	BattlegroundShine:Hide()
 
+	MiniMapMailIcon:SetTexture([=[Interface\Minimap\Tracking\Mailbox]=])
 	MiniMapMailFrame:SetParent(Minimap)
 	MiniMapMailBorder:SetTexture(nil)
 
