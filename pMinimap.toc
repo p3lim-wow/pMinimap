@@ -1,6 +1,6 @@
 ## Interface: 40000
 ## Author: p3lim
-## Version: Alpha
+## Version: 40000.9-Beta
 ## Title: pMinimap
 ## Notes: Yet another square minimap addon
 ## SavedVariables: pMinimapProfiles
