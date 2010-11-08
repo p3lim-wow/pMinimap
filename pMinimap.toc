@@ -3,17 +3,12 @@
 ## Version: Alpha
 ## Title: pMinimap
 ## Notes: Yet another square minimap addon
-## SavedVariablesPerChar: pMinimapDB
-## OptionalDeps: LibSharedMedia-3.0, SharedMedia
+## SavedVariables: pMinimapProfiles
+## OptionalDeps: LibConfig-1.0, LibSharedMedia-3.0, SharedMedia
 
 libs\LibStub.lua
 libs\CallbackHandler-1.0.lua
 libs\LibSharedMedia-3.0.lua
+libs\LibConfig-1.0.lua
 
 pMinimap.lua
-
-config\module.checkbox.lua
-config\module.dropdown.lua
-config\module.palette.lua
-config\module.slider.lua
-config\configuration.lua
